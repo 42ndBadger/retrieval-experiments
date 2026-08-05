@@ -1,8 +1,9 @@
 use clap::{Parser, Subcommand, ValueEnum};
-use data_gen::Distribution;
-use std::{fs, ops::Shl};
+use std::fs;
 
-mod data_gen;
+use retrieval_experiments::data_gen;
+use retrieval_experiments::data_gen::Distribution;
+use retrieval_experiments::instance::BenchmarkInstance;
 
 #[derive(Parser)]
 #[command(version, about, long_about = None)]
@@ -30,6 +31,10 @@ enum Command {
         input: String,
         #[arg(short, long)]
         output: String,
+        #[arg(short, long, default_value = "1")]
+        construction_repetitions: usize,
+        #[arg(short, long, default_value = "1000")]
+        query_repetitions: usize,
     },
 }
 
@@ -76,6 +81,8 @@ fn main() {
             algorithm,
             input,
             output,
+            construction_repetitions,
+            query_repetitions,
         } => {
             let input = fs::read_to_string(input).expect("failed to read input file");
             let kv = input
