@@ -1,6 +1,6 @@
 use clap::{Parser, Subcommand, ValueEnum};
 use data_gen::Distribution;
-use std::fs;
+use std::{fs, ops::Shl};
 
 mod data_gen;
 
@@ -24,8 +24,11 @@ enum Command {
         file: String,
     },
     Bench {
-        algorithm: String,
+        #[arg(short, long)]
+        algorithm: Algorithm,
+        #[arg(short, long)]
         input: String,
+        #[arg(short, long)]
         output: String,
     },
 }
@@ -35,6 +38,12 @@ enum DistributionSelection {
     Uniform,
     TruncatedGeometric,
     Bernoulli,
+}
+
+#[derive(Debug, Clone, Copy, ValueEnum)]
+enum Algorithm {
+    Consensus,
+    Caramel,
 }
 
 fn main() {
@@ -68,7 +77,12 @@ fn main() {
             input,
             output,
         } => {
-            todo!("benchmarking not yet implemented")
+            let input = fs::read_to_string(input).expect("failed to read input file");
+            let kv = input
+                .lines()
+                .map(|l| l.split_once(' ').unwrap())
+                .map(|(k, v)| (k, v.parse::<u64>().unwrap()))
+                .collect::<Vec<_>>();
         }
     }
 }
