@@ -2,6 +2,7 @@
 name = "retrieval-experiments"
 version = "0.1.0"
 edition = "2024"
+build = "build.rs"
 
 [dependencies]
 ahash = "0.8.12"
@@ -9,3 +10,10 @@ clap = "4.6.5"
 consensus-retrieval = { path = "../consensus-retrieval" }
 rand = "0.10.2"
 rand_distr = "0.6.0"
+
+[build-dependencies]
+cmake = "0.1"
+
+[profile.release]
+lto = true
+codegen-units = 1
