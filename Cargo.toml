@@ -6,10 +6,14 @@ build = "build.rs"
 
 [dependencies]
 ahash = "0.8.12"
+anyhow = "1.0.104"
 clap = "4.6.5"
 consensus-retrieval = { path = "../consensus-retrieval" }
+csv = "1.4.0"
 rand = "0.10.2"
 rand_distr = "0.6.0"
+serde = "1.0.229"
+serde_json = "1.0.151"
 
 [build-dependencies]
 cmake = "0.1"

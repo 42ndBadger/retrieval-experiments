@@ -1,6 +1,9 @@
+use serde::Serialize;
+
 use crate::instance::BenchmarkInstance;
 use crate::instance::Input;
 
+#[derive(Debug, Serialize)]
 pub struct ConstructionResult {
     iteration: usize,
     time_ns: u64,
@@ -27,6 +30,7 @@ pub fn construction_benchmark<T: BenchmarkInstance>(
     results
 }
 
+#[derive(Debug, Serialize)]
 pub struct QueryResult {
     iteration: usize,
     size: usize,
