@@ -3,11 +3,13 @@
 pkgs.mkShell {
   packages = with pkgs; [
     gcc
-    clang
     lld
     cmake
-    llvmPackages.openmp
     gnumake
     git
   ];
+  shellHook = ''
+      export LD_LIBRARY_PATH="${pkgs.stdenv.cc.cc.lib}/lib:$LD_LIBRARY_PATH"
+    '';
+
 }
