@@ -1,0 +1,379 @@
+{
+  "date": "2026-08-05T15:15:45.422873412+02:00",
+  "data": {
+    "CMAKE_CXX_VISIBILITY_PRESET": {
+      "location": {
+        "uri": "file:///home/jonatan/Documents/Coding/Rust/retrieval-experiments/caramel/CaramelDB/CMakeLists.txt",
+        "range": {
+          "start": {
+            "line": 13,
+            "character": 4
+          },
+          "end": {
+            "line": 13,
+            "character": 31
+          }
+        }
+      },
+      "document_info": "defined variable\nfrom: /home/jonatan/Documents/Coding/Rust/retrieval-experiments/caramel/CaramelDB/CMakeLists.txt",
+      "is_function": false
+    },
+    "CMAKE_BUILD_TYPE": {
+      "location": {
+        "uri": "file:///home/jonatan/Documents/Coding/Rust/retrieval-experiments/caramel/CaramelDB/CMakeLists.txt",
+        "range": {
+          "start": {
+            "line": 17,
+            "character": 8
+          },
+          "end": {
+            "line": 17,
+            "character": 24
+          }
+        }
+      },
+      "document_info": "defined variable\nfrom: /home/jonatan/Documents/Coding/Rust/retrieval-experiments/caramel/CaramelDB/CMakeLists.txt",
+      "is_function": false
+    },
+    "OpenMP_C_LIB_NAMES": {
+      "location": {
+        "uri": "file:///home/jonatan/Documents/Coding/Rust/retrieval-experiments/caramel/CaramelDB/CMakeLists.txt",
+        "range": {
+          "start": {
+            "line": 47,
+            "character": 8
+          },
+          "end": {
+            "line": 47,
+            "character": 26
+          }
+        }
+      },
+      "document_info": "defined variable\nfrom: /home/jonatan/Documents/Coding/Rust/retrieval-experiments/caramel/CaramelDB/CMakeLists.txt",
+      "is_function": false
+    },
+    "CMAKE_CXX_STANDARD_REQUIRED": {
+      "location": {
+        "uri": "file:///home/jonatan/Documents/Coding/Rust/retrieval-experiments/caramel/CaramelDB/CMakeLists.txt",
+        "range": {
+          "start": {
+            "line": 8,
+            "character": 4
+          },
+          "end": {
+            "line": 8,
+            "character": 31
+          }
+        }
+      },
+      "document_info": "defined variable\nfrom: /home/jonatan/Documents/Coding/Rust/retrieval-experiments/caramel/CaramelDB/CMakeLists.txt",
+      "is_function": false
+    },
+    "CARAMELDB_SOURCES": {
+      "location": {
+        "uri": "file:///home/jonatan/Documents/Coding/Rust/retrieval-experiments/caramel/CMakeLists.txt",
+        "range": {
+          "start": {
+            "line": 12,
+            "character": 4
+          },
+          "end": {
+            "line": 12,
+            "character": 21
+          }
+        }
+      },
+      "document_info": "defined variable\nfrom: /home/jonatan/Documents/Coding/Rust/retrieval-experiments/caramel/CMakeLists.txt",
+      "is_function": false
+    },
+    "OpenMP_CXX_FLAGS": {
+      "location": {
+        "uri": "file:///home/jonatan/Documents/Coding/Rust/retrieval-experiments/caramel/CaramelDB/CMakeLists.txt",
+        "range": {
+          "start": {
+            "line": 51,
+            "character": 8
+          },
+          "end": {
+            "line": 51,
+            "character": 24
+          }
+        }
+      },
+      "document_info": "defined variable\nfrom: /home/jonatan/Documents/Coding/Rust/retrieval-experiments/caramel/CaramelDB/CMakeLists.txt",
+      "is_function": false
+    },
+    "CARAMEL_ASAN_COMPILE_OPTIONS": {
+      "location": {
+        "uri": "file:///home/jonatan/Documents/Coding/Rust/retrieval-experiments/caramel/CaramelDB/CMakeLists.txt",
+        "range": {
+          "start": {
+            "line": 87,
+            "character": 4
+          },
+          "end": {
+            "line": 87,
+            "character": 32
+          }
+        }
+      },
+      "document_info": "defined variable\nfrom: /home/jonatan/Documents/Coding/Rust/retrieval-experiments/caramel/CaramelDB/CMakeLists.txt",
+      "is_function": false
+    },
+    "OpenMP_CXX_LIB_NAMES": {
+      "location": {
+        "uri": "file:///home/jonatan/Documents/Coding/Rust/retrieval-experiments/caramel/CaramelDB/CMakeLists.txt",
+        "range": {
+          "start": {
+            "line": 52,
+            "character": 8
+          },
+          "end": {
+            "line": 52,
+            "character": 28
+          }
+        }
+      },
+      "document_info": "defined variable\nfrom: /home/jonatan/Documents/Coding/Rust/retrieval-experiments/caramel/CaramelDB/CMakeLists.txt",
+      "is_function": false
+    },
+    "CMAKE_C_STANDARD": {
+      "location": {
+        "uri": "file:///home/jonatan/Documents/Coding/Rust/retrieval-experiments/caramel/CaramelDB/CMakeLists.txt",
+        "range": {
+          "start": {
+            "line": 6,
+            "character": 4
+          },
+          "end": {
+            "line": 6,
+            "character": 20
+          }
+        }
+      },
+      "document_info": "defined variable\nfrom: /home/jonatan/Documents/Coding/Rust/retrieval-experiments/caramel/CaramelDB/CMakeLists.txt",
+      "is_function": false
+    },
+    "CARAMEL_SOURCES": {
+      "location": {
+        "uri": "file:///home/jonatan/Documents/Coding/Rust/retrieval-experiments/caramel/CaramelDB/CMakeLists.txt",
+        "range": {
+          "start": {
+            "line": 110,
+            "character": 4
+          },
+          "end": {
+            "line": 110,
+            "character": 19
+          }
+        }
+      },
+      "document_info": "defined variable\nfrom: /home/jonatan/Documents/Coding/Rust/retrieval-experiments/caramel/CaramelDB/CMakeLists.txt",
+      "is_function": false
+    },
+    "CMAKE_CXX_EXTENSIONS": {
+      "location": {
+        "uri": "file:///home/jonatan/Documents/Coding/Rust/retrieval-experiments/caramel/CMakeLists.txt",
+        "range": {
+          "start": {
+            "line": 5,
+            "character": 4
+          },
+          "end": {
+            "line": 5,
+            "character": 24
+          }
+        }
+      },
+      "document_info": "defined variable\nfrom: /home/jonatan/Documents/Coding/Rust/retrieval-experiments/caramel/CMakeLists.txt",
+      "is_function": false
+    },
+    "CMAKE_CXX_STANDARD": {
+      "location": {
+        "uri": "file:///home/jonatan/Documents/Coding/Rust/retrieval-experiments/caramel/CaramelDB/CMakeLists.txt",
+        "range": {
+          "start": {
+            "line": 7,
+            "character": 4
+          },
+          "end": {
+            "line": 7,
+            "character": 22
+          }
+        }
+      },
+      "document_info": "defined variable\nfrom: /home/jonatan/Documents/Coding/Rust/retrieval-experiments/caramel/CaramelDB/CMakeLists.txt",
+      "is_function": false
+    },
+    "CARAMEL_COMPILE_OPTIONS": {
+      "location": {
+        "uri": "file:///home/jonatan/Documents/Coding/Rust/retrieval-experiments/caramel/CaramelDB/CMakeLists.txt",
+        "range": {
+          "start": {
+            "line": 60,
+            "character": 4
+          },
+          "end": {
+            "line": 60,
+            "character": 27
+          }
+        }
+      },
+      "document_info": "defined variable\nfrom: /home/jonatan/Documents/Coding/Rust/retrieval-experiments/caramel/CaramelDB/CMakeLists.txt",
+      "is_function": false
+    },
+    "CMAKE_C_VISIBILITY_PRESET": {
+      "location": {
+        "uri": "file:///home/jonatan/Documents/Coding/Rust/retrieval-experiments/caramel/CaramelDB/CMakeLists.txt",
+        "range": {
+          "start": {
+            "line": 12,
+            "character": 4
+          },
+          "end": {
+            "line": 12,
+            "character": 29
+          }
+        }
+      },
+      "document_info": "defined variable\nfrom: /home/jonatan/Documents/Coding/Rust/retrieval-experiments/caramel/CaramelDB/CMakeLists.txt\n\nhttps://stackoverflow.com/a/31157258/4565794",
+      "is_function": false
+    },
+    "OpenMP_C_FLAGS": {
+      "location": {
+        "uri": "file:///home/jonatan/Documents/Coding/Rust/retrieval-experiments/caramel/CaramelDB/CMakeLists.txt",
+        "range": {
+          "start": {
+            "line": 46,
+            "character": 8
+          },
+          "end": {
+            "line": 46,
+            "character": 22
+          }
+        }
+      },
+      "document_info": "defined variable\nfrom: /home/jonatan/Documents/Coding/Rust/retrieval-experiments/caramel/CaramelDB/CMakeLists.txt",
+      "is_function": false
+    },
+    "OpenMP_omp_LIBRARY": {
+      "location": {
+        "uri": "file:///home/jonatan/Documents/Coding/Rust/retrieval-experiments/caramel/CaramelDB/CMakeLists.txt",
+        "range": {
+          "start": {
+            "line": 53,
+            "character": 8
+          },
+          "end": {
+            "line": 53,
+            "character": 26
+          }
+        }
+      },
+      "document_info": "defined variable\nfrom: /home/jonatan/Documents/Coding/Rust/retrieval-experiments/caramel/CaramelDB/CMakeLists.txt",
+      "is_function": false
+    },
+    "CMAKE_MODULE_PATH": {
+      "location": {
+        "uri": "file:///home/jonatan/Documents/Coding/Rust/retrieval-experiments/caramel/CaramelDB/CMakeLists.txt",
+        "range": {
+          "start": {
+            "line": 2,
+            "character": 4
+          },
+          "end": {
+            "line": 2,
+            "character": 21
+          }
+        }
+      },
+      "document_info": "defined variable\nfrom: /home/jonatan/Documents/Coding/Rust/retrieval-experiments/caramel/CaramelDB/CMakeLists.txt",
+      "is_function": false
+    },
+    "LIBOMP_PREFIX": {
+      "location": {
+        "uri": "file:///home/jonatan/Documents/Coding/Rust/retrieval-experiments/caramel/CaramelDB/CMakeLists.txt",
+        "range": {
+          "start": {
+            "line": 41,
+            "character": 12
+          },
+          "end": {
+            "line": 41,
+            "character": 25
+          }
+        }
+      },
+      "document_info": "defined variable\nfrom: /home/jonatan/Documents/Coding/Rust/retrieval-experiments/caramel/CaramelDB/CMakeLists.txt",
+      "is_function": false
+    },
+    "SKIP_PERFORMANCE_COMPARISON": {
+      "location": {
+        "uri": "file:///home/jonatan/Documents/Coding/Rust/retrieval-experiments/caramel/CaramelDB/CMakeLists.txt",
+        "range": {
+          "start": {
+            "line": 92,
+            "character": 4
+          },
+          "end": {
+            "line": 92,
+            "character": 31
+          }
+        }
+      },
+      "document_info": "defined variable\nfrom: /home/jonatan/Documents/Coding/Rust/retrieval-experiments/caramel/CaramelDB/CMakeLists.txt\n\nskipping the performance comparison.",
+      "is_function": false
+    },
+    "CMAKE_POSITION_INDEPENDENT_CODE": {
+      "location": {
+        "uri": "file:///home/jonatan/Documents/Coding/Rust/retrieval-experiments/caramel/CaramelDB/CMakeLists.txt",
+        "range": {
+          "start": {
+            "line": 58,
+            "character": 4
+          },
+          "end": {
+            "line": 58,
+            "character": 35
+          }
+        }
+      },
+      "document_info": "defined variable\nfrom: /home/jonatan/Documents/Coding/Rust/retrieval-experiments/caramel/CaramelDB/CMakeLists.txt",
+      "is_function": false
+    },
+    "CARAMELDB_DIR": {
+      "location": {
+        "uri": "file:///home/jonatan/Documents/Coding/Rust/retrieval-experiments/caramel/CMakeLists.txt",
+        "range": {
+          "start": {
+            "line": 10,
+            "character": 4
+          },
+          "end": {
+            "line": 10,
+            "character": 17
+          }
+        }
+      },
+      "document_info": "defined variable\nfrom: /home/jonatan/Documents/Coding/Rust/retrieval-experiments/caramel/CMakeLists.txt",
+      "is_function": false
+    },
+    "CMAKE_VISIBILITY_INLINES_HIDDEN": {
+      "location": {
+        "uri": "file:///home/jonatan/Documents/Coding/Rust/retrieval-experiments/caramel/CaramelDB/CMakeLists.txt",
+        "range": {
+          "start": {
+            "line": 14,
+            "character": 4
+          },
+          "end": {
+            "line": 14,
+            "character": 35
+          }
+        }
+      },
+      "document_info": "defined variable\nfrom: /home/jonatan/Documents/Coding/Rust/retrieval-experiments/caramel/CaramelDB/CMakeLists.txt",
+      "is_function": false
+    }
+  }
+}

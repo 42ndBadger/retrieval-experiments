@@ -1,0 +1,3 @@
+[submodule "caramel/CaramelDB"]
+	path = caramel/CaramelDB
+	url = git@github.com:detorresramos/CaramelDB.git

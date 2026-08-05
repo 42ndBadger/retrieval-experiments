@@ -1,14 +1,9 @@
-pub fn add(left: u64, right: u64) -> u64 {
-    left + right
-}
+pub mod caramel;
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
+#[test]
+pub fn foo() {
+    let car = caramel::CsfU32::new(&[b"foo".as_slice()], &[22]).unwrap();
+    println!("{:?}", car.query(*&b"foo"));
+    
+    panic!()
 }

@@ -1,0 +1,207 @@
+{
+  "date": "2026-08-05T15:15:45.422811718+02:00",
+  "data": {
+    "/home/jonatan/Documents/Coding/Rust/retrieval-experiments/caramel/CaramelDB/CMakeLists.txt": [
+      {
+        "label": "CMAKE_MODULE_PATH",
+        "kind": 12,
+        "detail": "Value",
+        "documentation": "defined variable\nfrom: /home/jonatan/Documents/Coding/Rust/retrieval-experiments/caramel/CaramelDB/CMakeLists.txt"
+      },
+      {
+        "label": "CMAKE_C_STANDARD",
+        "kind": 12,
+        "detail": "Value",
+        "documentation": "defined variable\nfrom: /home/jonatan/Documents/Coding/Rust/retrieval-experiments/caramel/CaramelDB/CMakeLists.txt"
+      },
+      {
+        "label": "CMAKE_CXX_STANDARD",
+        "kind": 12,
+        "detail": "Value",
+        "documentation": "defined variable\nfrom: /home/jonatan/Documents/Coding/Rust/retrieval-experiments/caramel/CaramelDB/CMakeLists.txt"
+      },
+      {
+        "label": "CMAKE_CXX_STANDARD_REQUIRED",
+        "kind": 12,
+        "detail": "Value",
+        "documentation": "defined variable\nfrom: /home/jonatan/Documents/Coding/Rust/retrieval-experiments/caramel/CaramelDB/CMakeLists.txt"
+      },
+      {
+        "label": "CMAKE_C_VISIBILITY_PRESET",
+        "kind": 12,
+        "detail": "Value",
+        "documentation": "defined variable\nfrom: /home/jonatan/Documents/Coding/Rust/retrieval-experiments/caramel/CaramelDB/CMakeLists.txt\n\nhttps://stackoverflow.com/a/31157258/4565794"
+      },
+      {
+        "label": "CMAKE_CXX_VISIBILITY_PRESET",
+        "kind": 12,
+        "detail": "Value",
+        "documentation": "defined variable\nfrom: /home/jonatan/Documents/Coding/Rust/retrieval-experiments/caramel/CaramelDB/CMakeLists.txt"
+      },
+      {
+        "label": "CMAKE_VISIBILITY_INLINES_HIDDEN",
+        "kind": 12,
+        "detail": "Value",
+        "documentation": "defined variable\nfrom: /home/jonatan/Documents/Coding/Rust/retrieval-experiments/caramel/CaramelDB/CMakeLists.txt"
+      },
+      {
+        "label": "CMAKE_BUILD_TYPE",
+        "kind": 12,
+        "detail": "Value",
+        "documentation": "defined variable\nfrom: /home/jonatan/Documents/Coding/Rust/retrieval-experiments/caramel/CaramelDB/CMakeLists.txt"
+      },
+      {
+        "label": "Git_LIBRARIES",
+        "kind": 6,
+        "detail": "Variable",
+        "documentation": "package: Git"
+      },
+      {
+        "label": "Git_INCLUDE_DIRS",
+        "kind": 6,
+        "detail": "Variable",
+        "documentation": "package: Git"
+      },
+      {
+        "label": "LIBOMP_PREFIX",
+        "kind": 12,
+        "detail": "Value",
+        "documentation": "defined variable\nfrom: /home/jonatan/Documents/Coding/Rust/retrieval-experiments/caramel/CaramelDB/CMakeLists.txt"
+      },
+      {
+        "label": "LIBOMP_PREFIX",
+        "kind": 12,
+        "detail": "Value",
+        "documentation": "defined variable\nfrom: /home/jonatan/Documents/Coding/Rust/retrieval-experiments/caramel/CaramelDB/CMakeLists.txt"
+      },
+      {
+        "label": "OpenMP_C_FLAGS",
+        "kind": 12,
+        "detail": "Value",
+        "documentation": "defined variable\nfrom: /home/jonatan/Documents/Coding/Rust/retrieval-experiments/caramel/CaramelDB/CMakeLists.txt"
+      },
+      {
+        "label": "OpenMP_C_LIB_NAMES",
+        "kind": 12,
+        "detail": "Value",
+        "documentation": "defined variable\nfrom: /home/jonatan/Documents/Coding/Rust/retrieval-experiments/caramel/CaramelDB/CMakeLists.txt"
+      },
+      {
+        "label": "OpenMP_omp_LIBRARY",
+        "kind": 12,
+        "detail": "Value",
+        "documentation": "defined variable\nfrom: /home/jonatan/Documents/Coding/Rust/retrieval-experiments/caramel/CaramelDB/CMakeLists.txt"
+      },
+      {
+        "label": "OpenMP_CXX_FLAGS",
+        "kind": 12,
+        "detail": "Value",
+        "documentation": "defined variable\nfrom: /home/jonatan/Documents/Coding/Rust/retrieval-experiments/caramel/CaramelDB/CMakeLists.txt"
+      },
+      {
+        "label": "OpenMP_CXX_LIB_NAMES",
+        "kind": 12,
+        "detail": "Value",
+        "documentation": "defined variable\nfrom: /home/jonatan/Documents/Coding/Rust/retrieval-experiments/caramel/CaramelDB/CMakeLists.txt"
+      },
+      {
+        "label": "OpenMP_omp_LIBRARY",
+        "kind": 12,
+        "detail": "Value",
+        "documentation": "defined variable\nfrom: /home/jonatan/Documents/Coding/Rust/retrieval-experiments/caramel/CaramelDB/CMakeLists.txt"
+      },
+      {
+        "label": "OpenMP_LIBRARIES",
+        "kind": 6,
+        "detail": "Variable",
+        "documentation": "package: OpenMP"
+      },
+      {
+        "label": "OpenMP_INCLUDE_DIRS",
+        "kind": 6,
+        "detail": "Variable",
+        "documentation": "package: OpenMP"
+      },
+      {
+        "label": "CMAKE_POSITION_INDEPENDENT_CODE",
+        "kind": 12,
+        "detail": "Value",
+        "documentation": "defined variable\nfrom: /home/jonatan/Documents/Coding/Rust/retrieval-experiments/caramel/CaramelDB/CMakeLists.txt"
+      },
+      {
+        "label": "CARAMEL_COMPILE_OPTIONS",
+        "kind": 12,
+        "detail": "Value",
+        "documentation": "defined variable\nfrom: /home/jonatan/Documents/Coding/Rust/retrieval-experiments/caramel/CaramelDB/CMakeLists.txt"
+      },
+      {
+        "label": "CARAMEL_ASAN_COMPILE_OPTIONS",
+        "kind": 12,
+        "detail": "Value",
+        "documentation": "defined variable\nfrom: /home/jonatan/Documents/Coding/Rust/retrieval-experiments/caramel/CaramelDB/CMakeLists.txt"
+      },
+      {
+        "label": "SKIP_PERFORMANCE_COMPARISON",
+        "kind": 12,
+        "detail": "Value",
+        "documentation": "defined variable\nfrom: /home/jonatan/Documents/Coding/Rust/retrieval-experiments/caramel/CaramelDB/CMakeLists.txt\n\nskipping the performance comparison."
+      },
+      {
+        "label": "Python3::Interpreter",
+        "kind": 6,
+        "detail": "Variable",
+        "documentation": "package from: Python3"
+      },
+      {
+        "label": "Python3::Development",
+        "kind": 6,
+        "detail": "Variable",
+        "documentation": "package from: Python3"
+      },
+      {
+        "label": "Python3_LIBRARIES",
+        "kind": 6,
+        "detail": "Variable",
+        "documentation": "package: Python3"
+      },
+      {
+        "label": "Python3_INCLUDE_DIRS",
+        "kind": 6,
+        "detail": "Variable",
+        "documentation": "package: Python3"
+      },
+      {
+        "label": "CARAMEL_SOURCES",
+        "kind": 12,
+        "detail": "Value",
+        "documentation": "defined variable\nfrom: /home/jonatan/Documents/Coding/Rust/retrieval-experiments/caramel/CaramelDB/CMakeLists.txt"
+      }
+    ],
+    "/home/jonatan/Documents/Coding/Rust/retrieval-experiments/caramel/CMakeLists.txt": [
+      {
+        "label": "CMAKE_CXX_STANDARD",
+        "kind": 12,
+        "detail": "Value",
+        "documentation": "defined variable\nfrom: /home/jonatan/Documents/Coding/Rust/retrieval-experiments/caramel/CMakeLists.txt"
+      },
+      {
+        "label": "CMAKE_CXX_STANDARD_REQUIRED",
+        "kind": 12,
+        "detail": "Value",
+        "documentation": "defined variable\nfrom: /home/jonatan/Documents/Coding/Rust/retrieval-experiments/caramel/CMakeLists.txt"
+      },
+      {
+        "label": "CMAKE_CXX_EXTENSIONS",
+        "kind": 12,
+        "detail": "Value",
+        "documentation": "defined variable\nfrom: /home/jonatan/Documents/Coding/Rust/retrieval-experiments/caramel/CMakeLists.txt"
+      },
+      {
+        "label": "CMAKE_POSITION_INDEPENDENT_CODE",
+        "kind": 12,
+        "detail": "Value",
+        "documentation": "defined variable\nfrom: /home/jonatan/Documents/Coding/Rust/retrieval-experiments/caramel/CMakeLists.txt"
+      }
+    ]
+  }
+}
