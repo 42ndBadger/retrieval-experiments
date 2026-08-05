@@ -1,5 +1,13 @@
 use clap::{Parser, Subcommand, ValueEnum};
+use retrieval_experiments::benchmark::construction_benchmark;
+use retrieval_experiments::measurement_writer::{
+    MeasurementInfo, MeasurementType, write_measurement,
+};
+use serde_json::json;
 use std::fs;
+
+use consensus_retrieval::ConsensusRetrieval;
+use retrieval_experiments::caramel::CsfU32;
 
 use retrieval_experiments::data_gen;
 use retrieval_experiments::data_gen::Distribution;
@@ -75,7 +83,7 @@ fn main() {
                 .collect::<Vec<String>>()
                 .join("\n");
 
-            fs::write(file, data).expect("failed to write data to {file}");
+            fs::write(file, data).expect(&format!("failed to write data to {file}"));
         }
         Command::Bench {
             algorithm,
@@ -84,12 +92,42 @@ fn main() {
             construction_repetitions,
             query_repetitions,
         } => {
-            let input = fs::read_to_string(input).expect("failed to read input file");
-            let kv = input
+            let input_data = fs::read_to_string(input).expect("failed to read input file");
+            let kv = input_data
                 .lines()
                 .map(|l| l.split_once(' ').unwrap())
-                .map(|(k, v)| (k, v.parse::<u64>().unwrap()))
+                .map(|(k, v)| (k, v.parse::<u32>().unwrap()))
                 .collect::<Vec<_>>();
+
+            let (results, param) = match algorithm {
+                Algorithm::Consensus => (
+                    construction_benchmark::<ConsensusRetrieval<&str, u32>>(
+                        *construction_repetitions,
+                        &kv,
+                        &20,
+                    ),
+                    json!(20),
+                ),
+                Algorithm::Caramel => (
+                    construction_benchmark::<CsfU32>(*construction_repetitions, &kv, &()),
+                    json!(()),
+                ),
+            };
+
+            let config = MeasurementInfo {
+                m_type: MeasurementType::Construction,
+                n_iters: *construction_repetitions,
+                input_size: kv.len(),
+                input_file_name: input.clone(),
+                params: param,
+            };
+
+            write_measurement(
+                config,
+                results,
+                fs::File::create(output).expect(&format!("could not open output file {output}")),
+            )
+            .expect("writing failed");
         }
     }
 }

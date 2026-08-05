@@ -5,11 +5,11 @@ use serde_json::Value;
 
 #[derive(Debug, Serialize)]
 pub struct MeasurementInfo {
-    m_type: MeasurementType,
-    n_iters: usize,
-    input_size: usize,
-    input_file_name: String,
-    params: Value,
+    pub m_type: MeasurementType,
+    pub n_iters: usize,
+    pub input_size: usize,
+    pub input_file_name: String,
+    pub params: Value,
 }
 
 #[derive(Debug, Serialize)]
