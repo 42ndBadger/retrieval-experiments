@@ -13,7 +13,7 @@ pub struct ConstructionResult {
 pub fn construction_benchmark<T: BenchmarkInstance>(
     iters: usize,
     input: Input<'_>,
-    param: T::Params,
+    param: &T::Params,
 ) -> Vec<ConstructionResult> {
     let mut results = Vec::with_capacity(iters);
     for i in 0..iters {
@@ -40,7 +40,7 @@ pub struct QueryResult {
 pub fn query_benchmark<T: BenchmarkInstance>(
     iters: usize,
     input: Input<'_>,
-    param: T::Params,
+    param: &T::Params,
 ) -> Vec<QueryResult> {
     let t = T::create(input, param);
     let size = t.size();
