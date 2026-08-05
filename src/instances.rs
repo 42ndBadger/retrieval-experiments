@@ -5,25 +5,25 @@ use crate::{
     instance::{BenchmarkInstance, Value},
 };
 
-// impl BenchmarkInstance for ConsensusRetrieval<str, u32> {
-//     // ust `b` for now
-//     type Params = usize;
-//     fn create(input: crate::instance::Input<'_>, params: &Self::Params) -> Self {
-//         let input = input.iter().map(|(k, v)| (*k, *v)).collect();
-//         // ConsensusRetrieval::new_random(&input, *params)
-//         todo!()
-//     }
+impl<'a> BenchmarkInstance<'a> for ConsensusRetrieval<&'a str, u32> {
+    // ust `b` for now
+    type Params = usize;
+    fn create(input: crate::instance::Input<'a>, params: &Self::Params) -> Self {
+        let b = *params;
+        let input = input.iter().map(|(k, v)| (*k, *v)).collect();
+        ConsensusRetrieval::new_random(&input, b)
+    }
 
-//     fn query(&self, key: &str) -> Value {
-//         ConsensusRetrieval::query(self, &key)
-//     }
+    fn query(&self, key: &str) -> Value {
+        ConsensusRetrieval::query(self, &key)
+    }
 
-//     fn size(&self) -> usize {
-//         self.variable_part_bit_size().div_ceil(8)
-//     }
-// }
+    fn size(&self) -> usize {
+        self.variable_part_bit_size().div_ceil(8)
+    }
+}
 
-impl BenchmarkInstance for CsfU32 {
+impl<'a> BenchmarkInstance<'a> for CsfU32 {
     type Params = ();
 
     fn create(input: crate::instance::Input<'_>, params: &Self::Params) -> Self {
