@@ -10,11 +10,12 @@ pub struct ConstructionResult {
 pub fn construction_benchmark<T: BenchmarkInstance>(
     iters: usize,
     input: Input<'_>,
+    param: T::Params,
 ) -> Vec<ConstructionResult> {
     let mut results = Vec::with_capacity(iters);
     for i in 0..iters {
         let start = std::time::Instant::now();
-        let t = T::create(input);
+        let t = T::create(input, param);
         let took = start.elapsed();
         let size = t.size();
         results.push(ConstructionResult {
@@ -32,8 +33,12 @@ pub struct QueryResult {
     query_time_ns: u64,
 }
 
-pub fn query_benchmark<T: BenchmarkInstance>(iters: usize, input: Input<'_>) -> Vec<QueryResult> {
-    let t = T::create(input);
+pub fn query_benchmark<T: BenchmarkInstance>(
+    iters: usize,
+    input: Input<'_>,
+    param: T::Params,
+) -> Vec<QueryResult> {
+    let t = T::create(input, param);
     let size = t.size();
     let mut results = Vec::with_capacity(iters);
     let keys = input.iter().map(|x| x.0).cycle().take(iters);
