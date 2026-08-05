@@ -50,6 +50,36 @@ template <typename T> void free_csf(void *handle) {
   delete static_cast<CsfHandle<T> *>(handle);
 }
 
+template <typename T>
+T query_csf(const void *handle, const uint8_t *key, size_t key_len) {
+  const auto *h = static_cast<const CsfHandle<T> *>(handle);
+  return h->csf->query(reinterpret_cast<const char *>(key), key_len);
+}
+
+template <typename T> size_t size_csf(const void *handle) {
+  const auto *h = static_cast<const CsfHandle<T> *>(handle);
+  return h->csf->getStats().in_memory_bytes;
+}
+
+template <typename T>
+int stats_csf(const void *handle, CaramelCsfStats *out) {
+  try {
+    const auto *h = static_cast<const CsfHandle<T> *>(handle);
+    auto stats = h->csf->getStats();
+    out->in_memory_bytes = stats.in_memory_bytes;
+    out->solution_bytes = stats.solution_bytes;
+    out->filter_bytes = stats.filter_bytes;
+    out->metadata_bytes = stats.metadata_bytes;
+    out->num_buckets = stats.bucket_stats.num_buckets;
+    out->total_solution_bits = stats.bucket_stats.total_solution_bits;
+    out->num_unique_symbols = stats.huffman_stats.num_unique_symbols;
+    out->avg_bits_per_symbol = stats.huffman_stats.avg_bits_per_symbol;
+    return 0;
+  } catch (...) {
+    return -1;
+  }
+}
+
 } // namespace
 
 extern "C" {
@@ -65,6 +95,19 @@ void *caramel_csf_u32_build(const uint8_t *const *keys, const size_t *key_lens,
   return out;
 }
 
+uint32_t caramel_csf_u32_query(const void *handle, const uint8_t *key,
+                               size_t key_len) {
+  return query_csf<uint32_t>(handle, key, key_len);
+}
+
+size_t caramel_csf_u32_size(const void *handle) {
+  return size_csf<uint32_t>(handle);
+}
+
+int caramel_csf_u32_stats(const void *handle, CaramelCsfStats *out) {
+  return stats_csf<uint32_t>(handle, out);
+}
+
 void caramel_csf_u32_free(void *handle) { free_csf<uint32_t>(handle); }
 
 void *caramel_csf_u64_build(const uint8_t *const *keys, const size_t *key_lens,
@@ -76,6 +119,19 @@ void *caramel_csf_u64_build(const uint8_t *const *keys, const size_t *key_lens,
     return nullptr;
   }
   return out;
+}
+
+uint64_t caramel_csf_u64_query(const void *handle, const uint8_t *key,
+                               size_t key_len) {
+  return query_csf<uint64_t>(handle, key, key_len);
+}
+
+size_t caramel_csf_u64_size(const void *handle) {
+  return size_csf<uint64_t>(handle);
+}
+
+int caramel_csf_u64_stats(const void *handle, CaramelCsfStats *out) {
+  return stats_csf<uint64_t>(handle, out);
 }
 
 void caramel_csf_u64_free(void *handle) { free_csf<uint64_t>(handle); }
