@@ -6,6 +6,9 @@ use serde_json::Value;
 #[derive(Debug, Serialize)]
 pub struct MeasurementInfo {
     m_type: MeasurementType,
+    n_iters: usize,
+    input_size: usize,
+    input_file_name: String,
     params: Value,
 }
 
@@ -15,8 +18,8 @@ pub enum MeasurementType {
     Construction,
 }
 
-fn write_measurement(
-    config: impl Serialize,
+pub fn write_measurement(
+    config: MeasurementInfo,
     measurements: Vec<impl Serialize>,
     mut writer: impl Write,
 ) -> anyhow::Result<()> {
