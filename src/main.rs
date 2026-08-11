@@ -1,5 +1,5 @@
 use clap::{Parser, Subcommand, ValueEnum};
-use retrieval_experiments::benchmark::construction_benchmark;
+use retrieval_experiments::benchmark::{construction_benchmark, query_benchmark};
 use retrieval_experiments::measurement_writer::{
     MeasurementInfo, MeasurementType, write_measurement,
 };
@@ -11,7 +11,6 @@ use retrieval_experiments::caramel::CsfU32;
 
 use retrieval_experiments::data_gen;
 use retrieval_experiments::data_gen::Distribution;
-use retrieval_experiments::instance::BenchmarkInstance;
 
 #[derive(Parser)]
 #[command(version, about, long_about = None)]
@@ -99,17 +98,19 @@ fn main() {
                 .map(|(k, v)| (k, v.parse::<u32>().unwrap()))
                 .collect::<Vec<_>>();
 
-            let (results, param) = match algorithm {
+            let (construction_results, query_results, param) = match algorithm {
                 Algorithm::Consensus => (
                     construction_benchmark::<ConsensusRetrieval<&str, u32>>(
                         *construction_repetitions,
                         &kv,
                         &20,
                     ),
+                    query_benchmark::<ConsensusRetrieval<&str, u32>>(*query_repetitions, &kv, &20),
                     json!(20),
                 ),
                 Algorithm::Caramel => (
                     construction_benchmark::<CsfU32>(*construction_repetitions, &kv, &()),
+                    query_benchmark::<CsfU32>(*query_repetitions, &kv, &()),
                     json!(()),
                 ),
             };
@@ -119,13 +120,30 @@ fn main() {
                 n_iters: *construction_repetitions,
                 input_size: kv.len(),
                 input_file_name: input.clone(),
+                params: param.clone(),
+            };
+
+            write_measurement(
+                config,
+                construction_results,
+                fs::File::create(output.clone() + ".construction.json")
+                    .expect(&format!("could not open output file {output}")),
+            )
+            .expect("writing failed");
+
+            let config = MeasurementInfo {
+                m_type: MeasurementType::Query,
+                n_iters: *query_repetitions,
+                input_size: kv.len(),
+                input_file_name: input.clone(),
                 params: param,
             };
 
             write_measurement(
                 config,
-                results,
-                fs::File::create(output).expect(&format!("could not open output file {output}")),
+                query_results,
+                fs::File::create(output.clone() + ".query.json")
+                    .expect(&format!("could not open output file {output}")),
             )
             .expect("writing failed");
         }
