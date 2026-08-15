@@ -1,0 +1,24 @@
+# Example config for `python -m experiments.run experiments/example_config.toml`.
+# Run from the repository root.
+
+[experiment]
+n = 100000
+construction_repetitions = 20
+query_repetitions = 1000
+algorithms = ["consensus", "caramel"]
+data_dir = "data"
+results_dir = "results"
+plot_dir = "plots"
+
+[[distribution]]
+type = "uniform"
+bound = [3, 17]
+
+[[distribution]]
+type = "bernoulli"
+p = [0.2,  0.3,  0.5]
+
+[[distribution]]
+type = "truncated_geometric"
+p = [0.2]
+bound = [10, 20]
