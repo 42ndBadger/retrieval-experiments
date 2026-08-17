@@ -45,13 +45,21 @@ pub fn query_benchmark<'a, T: BenchmarkInstance<'a>>(
     let t = T::create(input, param);
     let size = t.size();
     let mut results = Vec::with_capacity(iters);
-    let keys = input.iter().map(|x| x.0).cycle().take(iters);
+    let chunk = 100;
+    let keys = input
+        .chunks_exact(chunk)
+        .map(|x| x.iter().map(|x| x.0))
+        .cycle()
+        .take(iters);
 
-    for (iter, key) in keys.enumerate() {
-        let start = std::time::Instant::now();
+    for (iter, keys) in keys.enumerate() {
         // todo batch queries for less overhead
-        t.query(key);
-        let took = start.elapsed();
+        let num_keys = keys.len();
+        let start = std::time::Instant::now();
+        for key in keys {
+            t.query(key);
+        }
+        let took = start.elapsed() / num_keys as u32;
         results.push(QueryResult {
             iteration: iter,
             size,
