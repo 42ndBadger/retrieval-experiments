@@ -52,19 +52,21 @@ def run_bench(
     out_base: Path,
     construction_repetitions: int,
     query_repetitions: int,
+    algo_params: dict[str, float | int] | None = None,
 ) -> None:
-    _run(
-        [
-            "bench",
-            "-a",
-            algorithm,
-            "-i",
-            str(input_path),
-            "-o",
-            str(out_base),
-            "-c",
-            str(construction_repetitions),
-            "-q",
-            str(query_repetitions),
-        ]
-    )
+    args = [
+        "bench",
+        "-a",
+        algorithm,
+        "-i",
+        str(input_path),
+        "-o",
+        str(out_base),
+        "-c",
+        str(construction_repetitions),
+        "-q",
+        str(query_repetitions),
+    ]
+    for k, v in (algo_params or {}).items():
+        args += ["--param", f"{k}={v}"]
+    _run(args)

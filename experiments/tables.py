@@ -29,16 +29,20 @@ _METRICS: dict[str, Callable[[pd.Series], float]] = {
 _GROUP_COLORS = ["#f4f4f2", "#e8e8e5"]
 
 
-def build_table(summary: pd.DataFrame, algorithms: list[str]) -> pd.DataFrame:
+def build_table(summary: pd.DataFrame, algorithms: list) -> pd.DataFrame:
     """Pivot `summary` into rows = (distribution, parameters), columns =
-    (algorithm, metric), sorted by distribution (declaration order in the
+    (algorithm_label, metric), sorted by distribution (declaration order in the
     data) then swept parameter value."""
+    from experiments.results import algo_label
+
     df = summary.copy()
     labels_and_keys = df.apply(
         lambda r: param_label_and_key(r["distribution"], r), axis=1
     )
     df["parameters"] = [lk[0] for lk in labels_and_keys]
     df["_sort_key"] = [lk[1] for lk in labels_and_keys]
+
+    algo_labels = {a.name: algo_label(a) for a in algorithms}
 
     dist_order = list(dict.fromkeys(df["distribution"]))
     dataset_keys = (
@@ -57,15 +61,16 @@ def build_table(summary: pd.DataFrame, algorithms: list[str]) -> pd.DataFrame:
             & (df["parameters"] == key["parameters"])
         ]
         row = {"distribution": key["distribution"], "parameters": key["parameters"]}
-        for algo in algorithms:
-            matches = subset[subset["algorithm"] == algo]
+        for algo_spec in algorithms:
+            label = algo_labels[algo_spec.name]
+            matches = subset[subset["algorithm_label"] == label]
             if matches.empty:
                 for metric in _METRICS:
-                    row[(algo, metric)] = float("nan")
+                    row[(label, metric)] = float("nan")
                 continue
             algo_row = matches.iloc[0]
             for metric, fn in _METRICS.items():
-                row[(algo, metric)] = fn(algo_row)
+                row[(label, metric)] = fn(algo_row)
         rows.append(row)
 
     table = pd.DataFrame(rows).set_index(["distribution", "parameters"])
@@ -120,7 +125,7 @@ def write_table_pdf(table: pd.DataFrame, out_path: Path) -> None:
     plt.close(fig)
 
 
-def write_tables(summary: pd.DataFrame, algorithms: list[str], plot_dir: Path) -> None:
+def write_tables(summary: pd.DataFrame, algorithms: list, plot_dir: Path) -> None:
     plot_dir.mkdir(parents=True, exist_ok=True)
     table = build_table(summary, algorithms)
     write_table_csv(table, plot_dir / "summary_table.csv")

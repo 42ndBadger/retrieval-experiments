@@ -4,6 +4,7 @@ use retrieval_experiments::measurement_writer::{
     MeasurementInfo, MeasurementType, write_measurement,
 };
 use serde_json::json;
+use std::collections::HashMap;
 use std::fs;
 
 use consensus_retrieval::ConsensusRetrieval;
@@ -42,6 +43,8 @@ enum Command {
         construction_repetitions: usize,
         #[arg(short, long, default_value = "1000")]
         query_repetitions: usize,
+        #[arg(short = 'P', long = "param", action = clap::ArgAction::Append)]
+        params: Vec<String>,
     },
 }
 
@@ -56,6 +59,17 @@ enum DistributionSelection {
 enum Algorithm {
     Consensus,
     Caramel,
+}
+
+fn parse_params(raw: &[String]) -> HashMap<String, String> {
+    let mut map = HashMap::new();
+    for entry in raw {
+        let (k, v) = entry
+            .split_once('=')
+            .unwrap_or_else(|| panic!("expected key=value, got {entry:?}"));
+        map.insert(k.to_string(), v.to_string());
+    }
+    map
 }
 
 fn main() {
@@ -90,6 +104,7 @@ fn main() {
             output,
             construction_repetitions,
             query_repetitions,
+            params,
         } => {
             let input_data = fs::read_to_string(input).expect("failed to read input file");
             let kv = input_data
@@ -98,16 +113,58 @@ fn main() {
                 .map(|(k, v)| (k, v.parse::<u32>().unwrap()))
                 .collect::<Vec<_>>();
 
+            let algo_params = parse_params(params);
+
             let (construction_results, query_results, param) = match algorithm {
-                Algorithm::Consensus => (
-                    construction_benchmark::<ConsensusRetrieval<&str, u32>>(
-                        *construction_repetitions,
-                        &kv,
-                        &20,
-                    ),
-                    query_benchmark::<ConsensusRetrieval<&str, u32>>(*query_repetitions, &kv, &20),
-                    json!(20),
-                ),
+                Algorithm::Consensus => {
+                    let consensus_params = consensus_retrieval::parameters::Parameters {
+                        avg_group_load: algo_params
+                            .get("avg_group_load")
+                            .map(|v| v.parse().expect("avg_group_load must be f64"))
+                            .expect("consensus requires --param avg_group_load=<f64>"),
+                        inital_group_width: algo_params
+                            .get("inital_group_width")
+                            .map(|v| v.parse().expect("inital_group_width must be usize"))
+                            .expect("consensus requires --param inital_group_width=<usize>"),
+                        insertion_increment: algo_params
+                            .get("insertion_increment")
+                            .map(|v| v.parse().expect("insertion_increment must be usize"))
+                            .expect("consensus requires --param insertion_increment=<usize>"),
+                        max_difficulty_of_task: algo_params
+                            .get("max_difficulty_of_task")
+                            .map(|v| v.parse().expect("max_difficulty_of_task must be f64"))
+                            .expect("consensus requires --param max_difficulty_of_task=<f64>"),
+                        max_difficulty_at_group_border: algo_params
+                            .get("max_difficulty_at_group_border")
+                            .map(|v| {
+                                v.parse()
+                                    .expect("max_difficulty_at_group_border must be f64")
+                            })
+                            .expect(
+                                "consensus requires --param max_difficulty_at_group_border=<f64>",
+                            ),
+                    };
+                    let param_json = json!({
+                        "avg_group_load": consensus_params.avg_group_load,
+                        "inital_group_width": consensus_params.inital_group_width,
+                        "insertion_increment": consensus_params.insertion_increment,
+                        "max_difficulty_of_task": consensus_params.max_difficulty_of_task,
+                        "max_difficulty_at_group_border": consensus_params.max_difficulty_at_group_border,
+                    });
+                    (
+                        construction_benchmark::<ConsensusRetrieval<&str, u32>>(
+                            *construction_repetitions,
+                            &kv,
+                            &consensus_params,
+                        ),
+                        query_benchmark::<ConsensusRetrieval<&str, u32>>(
+                            *query_repetitions,
+                            &kv,
+                            &consensus_params,
+                        ),
+                        param_json,
+                    )
+                }
                 Algorithm::Caramel => (
                     construction_benchmark::<CsfU32>(*construction_repetitions, &kv, &()),
                     query_benchmark::<CsfU32>(*query_repetitions, &kv, &()),

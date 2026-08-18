@@ -51,11 +51,17 @@ class DatasetSpec:
 
 
 @dataclass
+class AlgorithmSpec:
+    name: str
+    params: dict[str, float | int] = field(default_factory=dict)
+
+
+@dataclass
 class ExperimentConfig:
     n: int
     construction_repetitions: int
     query_repetitions: int
-    algorithms: list[str]
+    algorithms: list[AlgorithmSpec]
     data_dir: Path
     results_dir: Path
     plot_dir: Path
@@ -76,11 +82,17 @@ def load_config(path: str | Path) -> ExperimentConfig:
         for block in raw.get("distribution", [])
     ]
 
+    algorithms = []
+    for block in raw.get("algorithm", []):
+        name = block["name"]
+        params = dict(block.get("params", {}))
+        algorithms.append(AlgorithmSpec(name=name, params=params))
+
     return ExperimentConfig(
         n=experiment["n"],
         construction_repetitions=experiment["construction_repetitions"],
         query_repetitions=experiment["query_repetitions"],
-        algorithms=list(experiment["algorithms"]),
+        algorithms=algorithms,
         # Resolved to absolute paths (relative to the current working
         # directory) so they stay correct even though `cli_runner` runs
         # `cargo` with cwd set to the repo root.

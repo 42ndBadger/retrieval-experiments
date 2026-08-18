@@ -14,8 +14,8 @@ def run_benchmarks(
     config.results_dir.mkdir(parents=True, exist_ok=True)
     for spec in specs:
         input_path = dataset_path(spec, config.data_dir)
-        for algorithm in config.algorithms:
-            base = result_base_path(spec, algorithm, config.results_dir)
+        for algo_spec in config.algorithms:
+            base = result_base_path(spec, algo_spec, config.results_dir)
             construction_out = base.with_name(base.name + ".construction.json")
             query_out = base.with_name(base.name + ".query.json")
             if not force and construction_out.exists() and query_out.exists():
@@ -23,9 +23,10 @@ def run_benchmarks(
                 continue
             print(f"[bench] running: {base.name}")
             cli_runner.run_bench(
-                algorithm,
+                algo_spec.name,
                 input_path,
                 base,
                 config.construction_repetitions,
                 config.query_repetitions,
+                algo_params=algo_spec.params,
             )

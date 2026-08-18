@@ -1,4 +1,4 @@
-use consensus_retrieval::ConsensusRetrieval;
+use consensus_retrieval::{ConsensusRetrieval, parameters::Parameters};
 
 use crate::{
     caramel::CsfU32,
@@ -7,11 +7,11 @@ use crate::{
 
 impl<'a> BenchmarkInstance<'a> for ConsensusRetrieval<&'a str, u32> {
     // ust `b` for now
-    type Params = usize;
+    type Params = Parameters;
     fn create(input: crate::instance::Input<'a>, params: &Self::Params) -> Self {
-        let b = *params;
-        let input = input.iter().map(|(k, v)| (*k, *v)).collect();
-        ConsensusRetrieval::new_random(&input, b)
+        let input: std::collections::HashMap<&str, u32, ahash::RandomState> =
+            input.iter().map(|(k, v)| (*k, *v)).collect();
+        ConsensusRetrieval::new_with_parameters(&input, *params, ahash::RandomState::new())
     }
 
     fn query(&self, key: &str) -> Value {

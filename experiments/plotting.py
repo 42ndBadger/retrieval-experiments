@@ -36,8 +36,8 @@ _ALGO_COLORS = [
 ]
 
 
-def _algorithm_colors(algorithms: list[str]) -> dict[str, str]:
-    return {algo: _ALGO_COLORS[i % len(_ALGO_COLORS)] for i, algo in enumerate(algorithms)}
+def _algorithm_colors(algorithm_labels: list[str]) -> dict[str, str]:
+    return {label: _ALGO_COLORS[i % len(_ALGO_COLORS)] for i, label in enumerate(algorithm_labels)}
 
 
 def _plot_overhead_vs(
@@ -64,14 +64,14 @@ def _plot_overhead_vs(
     _UNFILLED_MARKERS = {"x", "+", "*", "1", "2", "3", "4"}
 
     fig, ax = plt.subplots(figsize=(7, 5))
-    for (algorithm, label), rows in group.groupby(["algorithm", "_param_label"]):
+    for (algo_label, label), rows in group.groupby(["algorithm_label", "_param_label"]):
         rows = rows.sort_values(time_col)
         marker = marker_for_label[label]
         edge_kwargs = {} if marker in _UNFILLED_MARKERS else {"edgecolors": "black", "linewidths": 0.4}
         ax.scatter(
             rows[time_col],
             rows["relative_overhead"],
-            color=algo_colors[algorithm],
+            color=algo_colors[algo_label],
             marker=marker,
             s=70,
             alpha=0.85,
@@ -86,10 +86,10 @@ def _plot_overhead_vs(
     algo_handles = [
         Line2D(
             [0], [0], marker="o", color="w", markerfacecolor=color,
-            markeredgecolor="black", markeredgewidth=0.4, markersize=9, label=algo,
+            markeredgecolor="black", markeredgewidth=0.4, markersize=9, label=label,
         )
-        for algo, color in algo_colors.items()
-        if algo in group["algorithm"].unique()
+        for label, color in algo_colors.items()
+        if label in group["algorithm_label"].unique()
     ]
     param_handles = [
         Line2D(
@@ -107,9 +107,11 @@ def _plot_overhead_vs(
     plt.close(fig)
 
 
-def plot_overhead_vs_time(summary: pd.DataFrame, algorithms: list[str], plot_dir: Path) -> None:
+def plot_overhead_vs_time(summary: pd.DataFrame, algorithms: list, plot_dir: Path) -> None:
     plot_dir.mkdir(parents=True, exist_ok=True)
-    algo_colors = _algorithm_colors(algorithms)
+    from experiments.results import algo_label
+    algorithm_labels = [algo_label(a) for a in algorithms]
+    algo_colors = _algorithm_colors(algorithm_labels)
     for distribution, group in summary.groupby("distribution"):
         _plot_overhead_vs(
             group,

@@ -31,14 +31,22 @@ def load_result(path: Path) -> Measurement:
     return Measurement(header=header, rows=rows)
 
 
+def algo_label(algo_spec) -> str:
+    """Human-readable algorithm label including params for display in plots/tables."""
+    if not algo_spec.params:
+        return algo_spec.name
+    parts = [f"{k}={v}" for k, v in sorted(algo_spec.params.items())]
+    return f"{algo_spec.name} [{', '.join(parts)}]"
+
+
 def build_summary(specs: list[DatasetSpec], config: ExperimentConfig) -> pd.DataFrame:
     """One row per (dataset spec, algorithm): distribution params, entropy,
     mean construction/query time, mean size, and relative overhead."""
     records = []
     for spec in specs:
         entropy = entropy_bits(spec)
-        for algorithm in config.algorithms:
-            base = result_base_path(spec, algorithm, config.results_dir)
+        for algo_spec in config.algorithms:
+            base = result_base_path(spec, algo_spec, config.results_dir)
             construction = load_result(base.with_name(base.name + ".construction.json"))
             query = load_result(base.with_name(base.name + ".query.json"))
 
@@ -52,7 +60,9 @@ def build_summary(specs: list[DatasetSpec], config: ExperimentConfig) -> pd.Data
                     **spec.params,
                     "n": spec.n,
                     "entropy_bits": entropy,
-                    "algorithm": algorithm,
+                    "algorithm": algo_spec.name,
+                    "algo_params": algo_spec.params,
+                    "algorithm_label": algo_label(algo_spec),
                     "mean_construction_time_ns": construction.rows["time_ns"].mean(),
                     "mean_query_time_ns": query.rows["query_time_ns"].mean(),
                     "mean_size_bytes": mean_size_bytes,
