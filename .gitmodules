@@ -1,3 +1,6 @@
 [submodule "caramel/CaramelDB"]
 	path = caramel/CaramelDB
 	url = git@github.com:detorresramos/CaramelDB.git
+[submodule "lsf/LearnedStaticFunction"]
+	path = lsf/LearnedStaticFunction
+	url = https://github.com/gvinciguerra/LearnedStaticFunction.git

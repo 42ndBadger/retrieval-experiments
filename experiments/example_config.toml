@@ -21,6 +21,9 @@ max_difficulty_at_group_border = 12.0
 [[algorithm]]
 name = "caramel"
 
+[[algorithm]]
+name = "lsf"
+
 [[distribution]]
 type = "uniform"
 bound = [3, 17]

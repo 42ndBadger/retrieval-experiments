@@ -3,6 +3,7 @@ use consensus_retrieval::{ConsensusRetrieval, parameters::Parameters};
 use crate::{
     caramel::CsfU32,
     instance::{BenchmarkInstance, Value},
+    lsf::LsfU32,
 };
 
 impl<'a> BenchmarkInstance<'a> for ConsensusRetrieval<&'a str, u32> {
@@ -34,6 +35,23 @@ impl<'a> BenchmarkInstance<'a> for CsfU32 {
 
     fn query(&self, key: &str) -> Value {
         CsfU32::query(self, key.as_bytes())
+    }
+
+    fn size(&self) -> usize {
+        self.size_bytes()
+    }
+}
+
+impl<'a> BenchmarkInstance<'a> for LsfU32 {
+    type Params = ();
+
+    fn create(input: crate::instance::Input<'_>, _params: &Self::Params) -> Self {
+        let (keys, values): (Vec<_>, Vec<_>) = input.iter().map(|(k, v)| (k.as_bytes(), v)).unzip();
+        LsfU32::new(&keys, &values).expect("valid")
+    }
+
+    fn query(&self, key: &str) -> Value {
+        LsfU32::query(self, key.as_bytes())
     }
 
     fn size(&self) -> usize {

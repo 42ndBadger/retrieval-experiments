@@ -9,6 +9,7 @@ use std::fs;
 
 use consensus_retrieval::ConsensusRetrieval;
 use retrieval_experiments::caramel::CsfU32;
+use retrieval_experiments::lsf::LsfU32;
 
 use retrieval_experiments::data_gen;
 use retrieval_experiments::data_gen::Distribution;
@@ -59,6 +60,7 @@ enum DistributionSelection {
 enum Algorithm {
     Consensus,
     Caramel,
+    Lsf,
 }
 
 fn parse_params(raw: &[String]) -> HashMap<String, String> {
@@ -168,6 +170,11 @@ fn main() {
                 Algorithm::Caramel => (
                     construction_benchmark::<CsfU32>(*construction_repetitions, &kv, &()),
                     query_benchmark::<CsfU32>(*query_repetitions, &kv, &()),
+                    json!(()),
+                ),
+                Algorithm::Lsf => (
+                    construction_benchmark::<LsfU32>(*construction_repetitions, &kv, &()),
+                    query_benchmark::<LsfU32>(*query_repetitions, &kv, &()),
                     json!(()),
                 ),
             };
