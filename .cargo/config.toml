@@ -1,7 +1,2 @@
-# -march=native/-ffast-math are set for the C++ dependencies (see
-# lsf/CMakeLists.txt and caramel/CMakeLists.txt); target-cpu=native gives
-# the pure-Rust Consensus implementation the same CPU-specific codegen, so
-# all three algorithms in the benchmark are compiled at the same
-# optimization level. Ties the resulting binary to this machine's CPU.
 [build]
 rustflags = ["-C", "target-cpu=native"]
