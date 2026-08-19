@@ -1,5 +1,8 @@
 """Step 4 (part 1): parse benchmark result files and build a tidy summary
-table with the derived relative-overhead metric."""
+table with the derived relative-overhead metric (`relative_overhead`,
+against **empirical** entropy - see CLAUDE.md's "Design decisions" note;
+the analytical value is computed separately, only in json_export.py's
+`distrs[].sub[]`, not used here)."""
 
 from __future__ import annotations
 
@@ -11,8 +14,8 @@ from pathlib import Path
 import pandas as pd
 
 from experiments.config import DatasetSpec, ExperimentConfig
-from experiments.entropy import entropy_bits
-from experiments.naming import config_label, result_base_path
+from experiments.entropy import empirical_entropy_bits
+from experiments.naming import config_label, dataset_path, result_base_path
 
 
 @dataclass
@@ -84,7 +87,10 @@ def build_summary(specs: list[DatasetSpec], config: ExperimentConfig) -> pd.Data
     """
     records = []
     for spec in specs:
-        entropy = entropy_bits(spec)
+        # Empirical, not analytical - see CLAUDE.md's "Design decisions"
+        # note. Read once per spec (not per algorithm config below), same
+        # as the old analytical call this replaced.
+        entropy = empirical_entropy_bits(dataset_path(spec, config.data_dir))
         for algo_spec in config.algorithms:
             base = result_base_path(spec, algo_spec, config.results_dir)
             construction = load_result(base.with_name(base.name + ".construction.json"))
@@ -111,7 +117,7 @@ def build_summary(specs: list[DatasetSpec], config: ExperimentConfig) -> pd.Data
                 "distribution": spec.type,
                 **spec.params,
                 "n": spec.n,
-                "entropy_bits": entropy,
+                "empirical_entropy_bits": entropy,
                 "algorithm": algo_spec.name,
                 "algo_spec": algo_spec,
                 "algorithm_label": config_label(algo_spec, config.algorithms),

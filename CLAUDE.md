@@ -23,16 +23,16 @@ tasks done and to be done here.
 
 ## Design decisions (confirmed with user)
 - Entropy in the "relative overhead over entropy" metric
-  (`rel_space_overhead`/`relative_overhead`) is the **analytical** Shannon
-  entropy computed from the distribution's closed-form parameters (p,
-  bound), not the empirical entropy of the generated data - this part of
-  the original decision still holds, so that metric doesn't move based on
-  which random keys happened to get generated. Superseded update (during
-  the json-refactor branch): the **empirical** entropy is now also
-  computed (`entropy.py::empirical_entropy_bits`, from the actual
-  generated `.kv` file) and exposed alongside the analytical one in the
-  JSON export, for comparison/sanity-checking - it's just no longer
-  excluded outright the way this bullet originally said.
+  (`rel_space_overhead`/`relative_overhead`, computed in
+  `results.py::build_summary`) is now the **empirical** Shannon entropy
+  - measured from the actual generated `.kv` file's value distribution
+  (`entropy.py::empirical_entropy_bits`) - as of a second revision on the
+  json-refactor branch. This reverses the immediately-preceding decision
+  below (which itself only reversed the *original* decision to compute
+  analytical only). Analytical entropy (`entropy.py::entropy_bits`,
+  closed-form from p/bound) is still computed and exposed separately in
+  the JSON export (`distrs[].sub[].analytical_entropy`) for comparison,
+  it's just no longer what the overhead metric is measured against.
 - Each distribution family (uniform, bernoulli, truncated-geometric) is
   **swept** over a list of p/bound values in the TOML config. Originally
   this meant a single tradeoff plot per family with a curve across entropy
