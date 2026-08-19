@@ -21,7 +21,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from matplotlib.lines import Line2D
 
-from experiments.naming import algorithm_family_label, dataset_instances, param_label_and_key
+from experiments.naming import algorithm_family_label, instance_groups
 
 # Fixed color/marker order (never reassigned per-plot) so a given algorithm
 # keeps the same look across every plot it appears in.
@@ -117,12 +117,7 @@ def plot_overhead_vs_time(summary: pd.DataFrame, algorithms: list, plot_dir: Pat
     algo_names = list(dict.fromkeys(a.name for a in algorithms))
     styles = _algorithm_styles(algo_names)
 
-    df = summary.copy()
-    labels_and_keys = df.apply(lambda r: param_label_and_key(r["distribution"], r), axis=1)
-    df["_parameters"] = [lk[0] for lk in labels_and_keys]
-
-    for instance in dataset_instances(summary):
-        group = df[(df["distribution"] == instance.distribution) & (df["_parameters"] == instance.parameters)]
+    for instance, group in instance_groups(summary):
         label = f"{instance.distribution} ({instance.parameters})"
         _plot_instance(
             group,

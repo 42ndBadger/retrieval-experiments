@@ -134,6 +134,19 @@ def dataset_instances(summary: pd.DataFrame) -> list[DatasetInstance]:
     ]
 
 
+def instance_groups(summary: pd.DataFrame) -> list[tuple[DatasetInstance, pd.DataFrame]]:
+    """Pair each `dataset_instances()` entry with the subset of `summary`
+    rows belonging to it - the per-instance filter shared by plotting.py
+    and csv_export.py so they don't each reimplement it."""
+    labels_and_keys = summary.apply(lambda r: param_label_and_key(r["distribution"], r), axis=1)
+    df = summary.copy()
+    df["_parameters"] = [lk[0] for lk in labels_and_keys]
+    return [
+        (instance, df[(df["distribution"] == instance.distribution) & (df["_parameters"] == instance.parameters)])
+        for instance in dataset_instances(summary)
+    ]
+
+
 def _algo_suffix(spec: AlgorithmSpec) -> str:
     """Filename-safe suffix encoding the algorithm name and its params."""
     if not spec.params:
