@@ -6,6 +6,18 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
+# Same flags upstream's own top-level CMakeLists.txt adds for Release
+# builds (`add_compile_options(-march=native -ffast-math)`, gated on
+# PROJECT_IS_TOP_LEVEL - true when *they* build it standalone). We can't
+# reuse that CMakeLists.txt at all (see below), so we replicate just the
+# flags here, applied before add_subdirectory so they also cover tlx/
+# ips2ra. Also applied to Caramel (caramel/CMakeLists.txt) and the Rust
+# build (.cargo/config.toml) for a fair three-way comparison. Ties the
+# resulting binaries to this machine's CPU.
+if(CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
+    add_compile_options(-march=native -ffast-math)
+endif()
+
 # We deliberately do NOT add_subdirectory(LearnedStaticFunction) and use its
 # own top-level CMakeLists.txt: that unconditionally builds TensorFlow Lite
 # from source (the `lib/tensorflow` submodule, multi-gigabyte, hours to
