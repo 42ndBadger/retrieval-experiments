@@ -9,7 +9,7 @@ pub struct ConstructionResult {
     iteration: usize,
     time_ns: u64,
     size: usize,
-    extra_json: Value,
+    extra_json: String,
 }
 
 pub fn construction_benchmark<'a, T: BenchmarkInstance<'a>>(
@@ -23,7 +23,7 @@ pub fn construction_benchmark<'a, T: BenchmarkInstance<'a>>(
         let t = T::create(input, param);
         let took = start.elapsed();
         let size = t.size();
-        let extra_json = serde_json::to_value(&t.extra()).unwrap_or_default();
+        let extra_json = serde_json::to_string(&t.extra()).unwrap_or_default();
         results.push(ConstructionResult {
             iteration: i,
             time_ns: took.as_nanos() as u64,
