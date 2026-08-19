@@ -1,4 +1,5 @@
 use serde::Serialize;
+use serde_json::Value;
 
 use crate::instance::BenchmarkInstance;
 use crate::instance::Input;
@@ -8,14 +9,7 @@ pub struct ConstructionResult {
     iteration: usize,
     time_ns: u64,
     size: usize,
-    // JSON-encoded `T::Extra` (e.g. consensus's space breakdown). Kept as
-    // a string rather than flattened struct fields: the `csv` crate's
-    // serde support can't write a header for a `#[serde(flatten)]`ed
-    // field (it serializes through a map, which csv writer rejects), so
-    // this is the columns-stay-generic-across-algorithms workaround -
-    // Python parses it with `json.loads` per row (empty/`{}` for
-    // algorithms with no extra data).
-    extra_json: String,
+    extra_json: Value,
 }
 
 pub fn construction_benchmark<'a, T: BenchmarkInstance<'a>>(
@@ -29,7 +23,7 @@ pub fn construction_benchmark<'a, T: BenchmarkInstance<'a>>(
         let t = T::create(input, param);
         let took = start.elapsed();
         let size = t.size();
-        let extra_json = serde_json::to_string(&t.extra()).unwrap_or_default();
+        let extra_json = serde_json::to_value(&t.extra()).unwrap_or_default();
         results.push(ConstructionResult {
             iteration: i,
             time_ns: took.as_nanos() as u64,

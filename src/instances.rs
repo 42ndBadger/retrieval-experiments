@@ -4,6 +4,7 @@ use serde::Serialize;
 use crate::{
     caramel::CsfU32,
     instance::{BenchmarkInstance, Value},
+    lsf::LsfU32,
 };
 
 #[derive(Serialize, Default)]
@@ -54,5 +55,25 @@ impl<'a> BenchmarkInstance<'a> for CsfU32 {
     fn size(&self) -> usize {
         self.size_bytes()
     }
+    fn extra(&self) -> Self::Extra {}
+}
+
+impl<'a> BenchmarkInstance<'a> for LsfU32 {
+    type Params = ();
+    type Extra = ();
+
+    fn create(input: crate::instance::Input<'_>, _params: &Self::Params) -> Self {
+        let (keys, values): (Vec<_>, Vec<_>) = input.iter().map(|(k, v)| (k.as_bytes(), v)).unzip();
+        LsfU32::new(&keys, &values).expect("valid")
+    }
+
+    fn query(&self, key: &str) -> Value {
+        LsfU32::query(self, key.as_bytes())
+    }
+
+    fn size(&self) -> usize {
+        self.size_bytes()
+    }
+
     fn extra(&self) -> Self::Extra {}
 }

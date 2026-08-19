@@ -12,6 +12,7 @@ use std::fs;
 
 use consensus_retrieval::ConsensusRetrieval;
 use retrieval_experiments::caramel::CsfU32;
+use retrieval_experiments::lsf::LsfU32;
 
 use retrieval_experiments::data_gen;
 use retrieval_experiments::data_gen::Distribution;
@@ -62,6 +63,7 @@ enum DistributionSelection {
 enum Algorithm {
     Consensus,
     Caramel,
+    Lsf,
 }
 
 fn parse_params(raw: &[String]) -> HashMap<String, String> {
@@ -118,11 +120,7 @@ fn main() {
 
             let algo_params = parse_params(params);
 
-            let (construction_results, query_results, param): (
-                Box<dyn Iterator<Item = Box<dyn erased_serde::Serialize>>>,
-                _,
-                _,
-            ) = match algorithm {
+            let (construction_results, query_results, param) = match algorithm {
                 Algorithm::Consensus => {
                     let consensus_params = consensus_retrieval::parameters::Parameters {
                         avg_group_load: algo_params
@@ -169,22 +167,18 @@ fn main() {
                         &consensus_params,
                     );
 
-                    (
-                        Box::new(constr.into_iter().map(|x| Box::new(x) as _)),
-                        query,
-                        param_json,
-                    )
+                    (constr, query, param_json)
                 }
-                Algorithm::Caramel => {
-                    let constr =
-                        construction_benchmark::<CsfU32>(*construction_repetitions, &kv, &());
-                    let query = query_benchmark::<CsfU32>(*query_repetitions, &kv, &());
-                    (
-                        Box::new(constr.into_iter().map(|x| Box::new(x) as _)),
-                        query,
-                        json!(()),
-                    )
-                }
+                Algorithm::Caramel => (
+                    construction_benchmark::<CsfU32>(*construction_repetitions, &kv, &()),
+                    query_benchmark::<CsfU32>(*query_repetitions, &kv, &()),
+                    json!(()),
+                ),
+                Algorithm::Lsf => (
+                    construction_benchmark::<LsfU32>(*construction_repetitions, &kv, &()),
+                    query_benchmark::<LsfU32>(*query_repetitions, &kv, &()),
+                    json!(()),
+                ),
             };
 
             let config = MeasurementInfo {
