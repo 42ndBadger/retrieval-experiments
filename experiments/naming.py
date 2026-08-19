@@ -97,8 +97,17 @@ class DatasetInstance:
     stem: str  # filename-safe, e.g. "uniform_bound3"
 
 
+def variant_params(distribution: str, row: pd.Series) -> dict:
+    """The raw swept parameter value(s) for a summary row (e.g.
+    `{"p": 0.1}`), as opposed to `param_label_and_key`'s formatted
+    `"p=0.1"` string - used where a caller wants the values themselves
+    rather than a display label (e.g. json_export.py's per-variant
+    `params`)."""
+    return {k: row[k] for k in ("p", "bound") if k in row.index and pd.notna(row[k])}
+
+
 def _instance_stem(distribution: str, row: pd.Series) -> str:
-    params = {k: row[k] for k in ("p", "bound") if k in row.index and pd.notna(row[k])}
+    params = variant_params(distribution, row)
     # Reuses _params_suffix's param-name knowledge via a throwaway
     # DatasetSpec; `n` is irrelevant here, _params_suffix doesn't use it.
     return f"{distribution}{_params_suffix(DatasetSpec(type=distribution, params=params, n=0))}"
