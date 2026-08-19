@@ -1,8 +1,10 @@
 """Step 4 (part 3): summary table - rows grouped by algorithm *config*
-(one group per [[algorithm]] entry, 4 metric sub-rows each: construction
-time/key, query time/key, space overhead %, bits/key), columns grouped by
-distribution family (one column per swept value, via
-naming.dataset_instances - the same enumeration plotting.py uses).
+(one group per [[algorithm]] entry, one metric sub-row each: construction
+time/key, query time/key, space overhead %, bits/key, plus consensus's
+consensus/insertion bits-per-key space breakdown - dashes for configs that
+don't report it), columns grouped by distribution family (one column per
+swept value, via naming.dataset_instances - the same enumeration
+plotting.py uses).
 
 Written as both a CSV (for further post-processing) and a Typst source
 file (`summary_table.typ`) - compiling that to PDF is left as a separate,
@@ -19,12 +21,18 @@ import pandas as pd
 from experiments.naming import config_row_label, dataset_instances, param_label_and_key
 
 # Each metric is computed from one row of `build_summary`'s output. Order
-# here is the row order within each config's group in the table.
+# here is the row order within each config's group in the table. The last
+# two are algorithm-specific (currently only consensus, via
+# results.py::_extra_bit_fields) - `.get` with a NaN default so configs
+# that don't report them render as "-" instead of erroring, and so the
+# whole table still builds even if no config in this run produces them.
 _METRICS: dict[str, Callable[[pd.Series], float]] = {
     "construction time/key (ns)": lambda r: r["construction_time_per_key_ns"],
     "query time/key (ns)": lambda r: r["query_time_per_key_ns"],
     "space overhead (%)": lambda r: r["space_overhead_pct"],
     "bits/key": lambda r: r["bits_per_key"],
+    "consensus bits/key": lambda r: r.get("consensus_bits_per_key", float("nan")),
+    "insertion bits/key": lambda r: r.get("insertion_bits_per_key", float("nan")),
 }
 
 # Alternating column-group background shades, one per distribution family.
