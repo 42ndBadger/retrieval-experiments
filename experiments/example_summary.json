@@ -1,0 +1,134 @@
+{
+  "n": 100000,
+  "construction-reps": 2,
+  "query-reps": 20,
+  "distrs": [
+    {
+      "name": "bernoulli",
+      "sub": [
+        { "params": { "p": 0.1 }, "analytical_entropy": 0.4689955935892812, "empirical_entropy": 0.4723152056796056 },
+        { "params": { "p": 0.25 }, "analytical_entropy": 0.8112781244591328, "empirical_entropy": 0.8125278454883895 }
+      ]
+    },
+    {
+      "name": "uniform",
+      "sub": [
+        { "params": { "bound": 3 }, "analytical_entropy": 1.584962500721156, "empirical_entropy": 1.5849611437348545 }
+      ]
+    }
+  ],
+  "algs": [
+    {
+      "name": "Consensus A",
+      "params": {
+        "avg_group_load": 35,
+        "inital_group_width": 30,
+        "insertion_increment": 8,
+        "max_difficulty_of_task": 16,
+        "max_difficulty_at_group_border": 12.0
+      },
+      "measurement_keys": [
+        "constr_time", "constr_std",
+        "query_time", "query_std",
+        "space_bits", "space_bits_std",
+        "rel_space_overhead", "rel_space_overhead_std",
+        "consensus_bits", "consensus_bits_std",
+        "insertion_bits", "insertion_bits_std"
+      ],
+      "distrs": [
+        {
+          "name": "bernoulli",
+          "variants": [
+            {
+              "params": { "p": 0.1 },
+              "measurements": {
+                "constr_time": 10606.775, "constr_std": 3766.27,
+                "query_time": 52.4, "query_std": 2.137,
+                "space_bits": 1.474, "space_bits_std": 0.0141,
+                "rel_space_overhead": 2.1429, "rel_space_overhead_std": 0.0302,
+                "consensus_bits": 0.5115, "consensus_bits_std": 0.0141,
+                "insertion_bits": 0.96, "insertion_bits_std": 0.0
+              }
+            },
+            {
+              "params": { "p": 0.25 },
+              "measurements": {
+                "constr_time": 30885.7, "constr_std": 9500.0,
+                "query_time": 56.85, "query_std": 2.4,
+                "space_bits": 1.862, "space_bits_std": 0.02,
+                "rel_space_overhead": 1.2951, "rel_space_overhead_std": 0.03,
+                "consensus_bits": 0.8665, "consensus_bits_std": 0.015,
+                "insertion_bits": 0.992, "insertion_bits_std": 0.005
+              }
+            }
+          ]
+        },
+        {
+          "name": "uniform",
+          "variants": [
+            {
+              "params": { "bound": 3 },
+              "measurements": {
+                "constr_time": 6000.0, "constr_std": 1200.0,
+                "query_time": 60.0, "query_std": 3.0,
+                "space_bits": 1.9, "space_bits_std": 0.02,
+                "rel_space_overhead": 0.199, "rel_space_overhead_std": 0.01,
+                "consensus_bits": 0.9, "consensus_bits_std": 0.01,
+                "insertion_bits": 1.0, "insertion_bits_std": 0.01
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Caramel",
+      "params": {},
+      "measurement_keys": [
+        "constr_time", "constr_std",
+        "query_time", "query_std",
+        "space_bits", "space_bits_std",
+        "rel_space_overhead", "rel_space_overhead_std"
+      ],
+      "distrs": [
+        {
+          "name": "bernoulli",
+          "variants": [
+            {
+              "params": { "p": 0.1 },
+              "measurements": {
+                "constr_time": 1363.12, "constr_std": 1272.22,
+                "query_time": 238.3, "query_std": 141.03,
+                "space_bits": 1.452, "space_bits_std": 0.0,
+                "rel_space_overhead": 2.096, "rel_space_overhead_std": 0.0
+              }
+            },
+            {
+              "params": { "p": 0.25 },
+              "measurements": {
+                "constr_time": 1275.96, "constr_std": 900.0,
+                "query_time": 30.2, "query_std": 15.0,
+                "space_bits": 1.452, "space_bits_std": 0.0,
+                "rel_space_overhead": 0.7898, "rel_space_overhead_std": 0.0
+              }
+            }
+          ]
+        },
+        {
+          "name": "uniform",
+          "variants": [
+            {
+              "params": { "bound": 3 },
+              "measurements": {
+                "constr_time": 1300.0, "constr_std": 200.0,
+                "query_time": 45.0, "query_std": 5.0,
+                "space_bits": 1.9, "space_bits_std": 0.0,
+                "rel_space_overhead": 0.199, "rel_space_overhead_std": 0.0
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

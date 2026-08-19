@@ -11,6 +11,7 @@ from experiments.bench import run_benchmarks
 from experiments.config import expand_datasets, load_config
 from experiments.csv_export import write_instance_csvs
 from experiments.datagen import ensure_datasets
+from experiments.json_export import write_summary_json
 from experiments.plotting import plot_overhead_vs_time
 from experiments.results import build_summary
 from experiments.tables import write_tables
@@ -48,7 +49,8 @@ def main() -> None:
         plot_overhead_vs_time(summary, config.algorithms, config.plot_dir)
         write_tables(summary, config.algorithms, config.plot_dir)
         write_instance_csvs(summary, config.plot_dir)
-        print(f"plots, tables, and per-instance CSVs written to {config.plot_dir}")
+        write_summary_json(specs, summary, config, config.plot_dir)
+        print(f"plots, tables, per-instance CSVs, and summary.json written to {config.plot_dir}")
 
 
 if __name__ == "__main__":
