@@ -1,10 +1,16 @@
 """Step 4 (part 2): tradeoff plots of relative overhead (over the
 analytical entropy) vs. construction/query time.
 
-One PDF per (distribution family, {construction, query}) pair. Within a
-plot, marker shape distinguishes the distribution's swept parameter(s) and
-color distinguishes the algorithm - so a legend entry's shape reads across
-algorithms and its color reads across parameter values.
+One PDF per (dataset instance, {construction, query}) pair, where a
+"dataset instance" is one exact distribution + swept-parameter-value
+combination (e.g. "bernoulli, p=0.1") - see naming.dataset_instances, the
+same enumeration tables.py uses for its columns. Within a plot, X is
+relative space overhead and Y is time/key (log scale); each *algorithm*
+(not each config) gets one fixed color+marker, and sibling configs of the
+same algorithm - e.g. differently-tuned Consensus runs - are drawn as
+separate points connected by a line (sorted by X) so the line traces out
+that algorithm's own tradeoff curve on this one dataset. Each point is
+annotated with its config's display label (naming.config_label).
 """
 
 from __future__ import annotations
@@ -15,15 +21,10 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from matplotlib.lines import Line2D
 
-from experiments.naming import param_label_and_key
+from experiments.naming import algorithm_family_label, dataset_instances, param_label_and_key
 
-# Fixed marker order (never reassigned per-plot) so the same swept
-# parameter, when it appears in more than one plot, keeps its shape.
-_MARKERS = ["x", "o", "v", "^", "s", "D", "P", "*", "<", ">"]
-
-# Validated categorical palette (see the dataviz skill's palette.md), first
-# slots first - colorblind-safe for up to 3 series at once. Assigned once,
-# in a fixed order (config declaration order), never re-derived per plot.
+# Fixed color/marker order (never reassigned per-plot) so a given algorithm
+# keeps the same look across every plot it appears in.
 _ALGO_COLORS = [
     "#2a78d6",  # blue
     "#eb6834",  # orange
@@ -34,73 +35,76 @@ _ALGO_COLORS = [
     "#4a3aa7",  # violet
     "#e34948",  # red
 ]
+_MARKERS = ["x", "o", "*", "^", "s", "D", "P", "v", "<", ">"]
+
+# Markers without a fillable interior (x, +, *, ...) don't take an
+# edgecolor distinct from their face color; matplotlib warns if given one,
+# so only pass it for markers that actually have a face.
+_UNFILLED_MARKERS = {"x", "+", "*", "1", "2", "3", "4"}
 
 
-def _algorithm_colors(algorithm_labels: list[str]) -> dict[str, str]:
-    return {label: _ALGO_COLORS[i % len(_ALGO_COLORS)] for i, label in enumerate(algorithm_labels)}
+def _algorithm_styles(algorithm_names: list[str]) -> dict[str, tuple[str, str]]:
+    """{raw algorithm name: (color, marker)}, assigned once in first-seen
+    order across the whole run."""
+    return {
+        name: (_ALGO_COLORS[i % len(_ALGO_COLORS)], _MARKERS[i % len(_MARKERS)])
+        for i, name in enumerate(algorithm_names)
+    }
 
 
-def _plot_overhead_vs(
+def _plot_instance(
     group: pd.DataFrame,
-    time_col: str,
-    xlabel: str,
+    styles: dict[str, tuple[str, str]],
+    y_col: str,
+    ylabel: str,
     title: str,
     out_path: Path,
-    algo_colors: dict[str, str],
 ) -> None:
-    distribution = group["distribution"].iloc[0]
-    group = group.copy()
-    labels_and_keys = group.apply(
-        lambda r: param_label_and_key(distribution, r), axis=1
-    )
-    group["_param_label"] = [lk[0] for lk in labels_and_keys]
-    sort_keys = {lk[0]: lk[1] for lk in labels_and_keys}
-    ordered_labels = sorted(sort_keys, key=lambda l: sort_keys[l])
-    marker_for_label = {l: _MARKERS[i % len(_MARKERS)] for i, l in enumerate(ordered_labels)}
-
-    # Markers without a fillable interior (x, +, *, ...) don't take an
-    # edgecolor distinct from their face color; matplotlib warns if given
-    # one, so only pass it for markers that actually have a face.
-    _UNFILLED_MARKERS = {"x", "+", "*", "1", "2", "3", "4"}
-
     fig, ax = plt.subplots(figsize=(7, 5))
-    for (algo_label, label), rows in group.groupby(["algorithm_label", "_param_label"]):
-        rows = rows.sort_values(time_col)
-        marker = marker_for_label[label]
+
+    for algo_name, rows in group.groupby("algorithm"):
+        color, marker = styles[algo_name]
+        rows = rows.sort_values("relative_overhead")
+
+        if len(rows) > 1:
+            ax.plot(rows["relative_overhead"], rows[y_col], color=color, linewidth=1.2, alpha=0.6, zorder=1)
+
         edge_kwargs = {} if marker in _UNFILLED_MARKERS else {"edgecolors": "black", "linewidths": 0.4}
         ax.scatter(
-            rows[time_col],
             rows["relative_overhead"],
-            color=algo_colors[algo_label],
+            rows[y_col],
+            color=color,
             marker=marker,
             s=70,
-            alpha=0.85,
+            alpha=0.9,
+            zorder=2,
             **edge_kwargs,
         )
-    ax.set_xscale("log")
-    ax.set_xlabel(xlabel)
-    ax.set_ylabel("relative overhead over entropy  ((bits/key - H) / H)")
+        for _, row in rows.iterrows():
+            ax.annotate(
+                row["algorithm_label"],
+                (row["relative_overhead"], row[y_col]),
+                textcoords="offset points",
+                xytext=(6, 4),
+                fontsize=7,
+            )
+
+    ax.set_yscale("log")
+    ax.set_xlabel("relative overhead over entropy  ((bits/key - H) / H)")
+    ax.set_ylabel(ylabel)
     ax.set_title(title)
     ax.grid(True, which="both", linestyle=":", alpha=0.5)
 
     algo_handles = [
         Line2D(
-            [0], [0], marker="o", color="w", markerfacecolor=color,
-            markeredgecolor="black", markeredgewidth=0.4, markersize=9, label=label,
+            [0], [0], marker=marker, color=color, linestyle="None",
+            markeredgecolor="black" if marker not in _UNFILLED_MARKERS else color,
+            markeredgewidth=0.4, markersize=9, label=algorithm_family_label(name),
         )
-        for label, color in algo_colors.items()
-        if label in group["algorithm_label"].unique()
+        for name, (color, marker) in styles.items()
+        if name in group["algorithm"].unique()
     ]
-    param_handles = [
-        Line2D(
-            [0], [0], marker=marker, color="black", linestyle="None",
-            markersize=9, label=label,
-        )
-        for label, marker in marker_for_label.items()
-    ]
-    algo_legend = ax.legend(handles=algo_handles, title="algorithm", loc="upper left")
-    ax.add_artist(algo_legend)
-    ax.legend(handles=param_handles, title="parameters", loc="upper right", fontsize=8)
+    ax.legend(handles=algo_handles, title="algorithm", loc="best")
 
     fig.tight_layout()
     fig.savefig(out_path, format="pdf")
@@ -109,23 +113,30 @@ def _plot_overhead_vs(
 
 def plot_overhead_vs_time(summary: pd.DataFrame, algorithms: list, plot_dir: Path) -> None:
     plot_dir.mkdir(parents=True, exist_ok=True)
-    from experiments.results import algo_label
-    algorithm_labels = [algo_label(a) for a in algorithms]
-    algo_colors = _algorithm_colors(algorithm_labels)
-    for distribution, group in summary.groupby("distribution"):
-        _plot_overhead_vs(
+
+    algo_names = list(dict.fromkeys(a.name for a in algorithms))
+    styles = _algorithm_styles(algo_names)
+
+    df = summary.copy()
+    labels_and_keys = df.apply(lambda r: param_label_and_key(r["distribution"], r), axis=1)
+    df["_parameters"] = [lk[0] for lk in labels_and_keys]
+
+    for instance in dataset_instances(summary):
+        group = df[(df["distribution"] == instance.distribution) & (df["_parameters"] == instance.parameters)]
+        label = f"{instance.distribution} ({instance.parameters})"
+        _plot_instance(
             group,
-            time_col="mean_construction_time_ns",
-            xlabel="mean construction time (ns, log scale)",
-            title=f"Relative overhead vs. construction time ({distribution})",
-            out_path=plot_dir / f"overhead_vs_construction_{distribution}.pdf",
-            algo_colors=algo_colors,
+            styles,
+            y_col="construction_time_per_key_ns",
+            ylabel="mean construction time per key (ns, log scale)",
+            title=f"Relative overhead vs. construction time - {label}",
+            out_path=plot_dir / f"overhead_vs_construction_{instance.stem}.pdf",
         )
-        _plot_overhead_vs(
+        _plot_instance(
             group,
-            time_col="mean_query_time_ns",
-            xlabel="mean query time (ns, log scale)",
-            title=f"Relative overhead vs. query time ({distribution})",
-            out_path=plot_dir / f"overhead_vs_query_{distribution}.pdf",
-            algo_colors=algo_colors,
+            styles,
+            y_col="query_time_per_key_ns",
+            ylabel="mean query time per key (ns, log scale)",
+            title=f"Relative overhead vs. query time - {label}",
+            out_path=plot_dir / f"overhead_vs_query_{instance.stem}.pdf",
         )

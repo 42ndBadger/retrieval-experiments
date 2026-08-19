@@ -54,6 +54,12 @@ class DatasetSpec:
 class AlgorithmSpec:
     name: str
     params: dict[str, float | int] = field(default_factory=dict)
+    # Short human-readable label for this specific config, e.g. "Consensus
+    # A" - shown instead of a raw param dump in plots/tables (see
+    # naming.py::config_label). Required when more than one config shares
+    # `name` (see _validate_display_names below); optional otherwise, in
+    # which case a per-algorithm default is used.
+    display_name: str | None = None
 
 
 @dataclass
@@ -66,6 +72,33 @@ class ExperimentConfig:
     results_dir: Path
     plot_dir: Path
     distributions: list[DistributionSweep] = field(default_factory=list)
+
+
+def _validate_display_names(algorithms: list[AlgorithmSpec]) -> None:
+    """Fail fast (before any gen/bench runs) if two configs sharing an
+    algorithm `name` would be ambiguous - i.e. more than one config per
+    name, and not all of them have an explicit `display_name`."""
+    by_name: dict[str, list[AlgorithmSpec]] = {}
+    for spec in algorithms:
+        by_name.setdefault(spec.name, []).append(spec)
+    for name, siblings in by_name.items():
+        if len(siblings) > 1 and not all(s.display_name for s in siblings):
+            raise ValueError(
+                f"{len(siblings)} [[algorithm]] configs share name {name!r}; "
+                "each needs its own `display_name` to disambiguate them "
+                "(e.g. \"Consensus A\", \"Consensus B\")"
+            )
+
+    # Also catch accidental collisions: two configs (same algorithm or
+    # not) both explicitly given the same display_name would silently
+    # merge into one row/point downstream.
+    explicit = [s.display_name for s in algorithms if s.display_name]
+    duplicates = sorted({n for n in explicit if explicit.count(n) > 1})
+    if duplicates:
+        raise ValueError(
+            f"duplicate display_name(s) {duplicates!r} across [[algorithm]] "
+            "configs - each config's display_name must be unique"
+        )
 
 
 def load_config(path: str | Path) -> ExperimentConfig:
@@ -86,7 +119,9 @@ def load_config(path: str | Path) -> ExperimentConfig:
     for block in raw.get("algorithm", []):
         name = block["name"]
         params = dict(block.get("params", {}))
-        algorithms.append(AlgorithmSpec(name=name, params=params))
+        display_name = block.get("display_name")
+        algorithms.append(AlgorithmSpec(name=name, params=params, display_name=display_name))
+    _validate_display_names(algorithms)
 
     return ExperimentConfig(
         n=experiment["n"],

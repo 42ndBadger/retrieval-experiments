@@ -12,7 +12,7 @@ import pandas as pd
 
 from experiments.config import DatasetSpec, ExperimentConfig
 from experiments.entropy import entropy_bits
-from experiments.naming import result_base_path
+from experiments.naming import config_label, result_base_path
 
 
 @dataclass
@@ -31,17 +31,19 @@ def load_result(path: Path) -> Measurement:
     return Measurement(header=header, rows=rows)
 
 
-def algo_label(algo_spec) -> str:
-    """Human-readable algorithm label including params for display in plots/tables."""
-    if not algo_spec.params:
-        return algo_spec.name
-    parts = [f"{k}={v}" for k, v in sorted(algo_spec.params.items())]
-    return f"{algo_spec.name} [{', '.join(parts)}]"
-
-
 def build_summary(specs: list[DatasetSpec], config: ExperimentConfig) -> pd.DataFrame:
-    """One row per (dataset spec, algorithm): distribution params, entropy,
-    mean construction/query time, mean size, and relative overhead."""
+    """One row per (dataset spec, algorithm config): distribution params,
+    entropy, mean construction/query time, mean size, and relative
+    overhead.
+
+    `algorithm` is the raw algorithm name (e.g. "consensus"), shared by
+    sibling configs - used to group them as one family in plots/tables.
+    `algorithm_label` is the human-readable per-config display label (see
+    naming.py::config_label). `algo_spec` carries the exact AlgorithmSpec
+    so downstream code (naming.differing_params/config_row_label) can
+    identify a row's sibling group precisely, without re-matching on
+    label strings.
+    """
     records = []
     for spec in specs:
         entropy = entropy_bits(spec)
@@ -53,6 +55,8 @@ def build_summary(specs: list[DatasetSpec], config: ExperimentConfig) -> pd.Data
             mean_size_bytes = construction.rows["size"].mean()
             bits_per_key = mean_size_bytes * 8 / spec.n
             relative_overhead = (bits_per_key - entropy) / entropy
+            mean_construction_time_ns = construction.rows["time_ns"].mean()
+            mean_query_time_ns = query.rows["query_time_ns"].mean()
 
             records.append(
                 {
@@ -61,13 +65,21 @@ def build_summary(specs: list[DatasetSpec], config: ExperimentConfig) -> pd.Data
                     "n": spec.n,
                     "entropy_bits": entropy,
                     "algorithm": algo_spec.name,
-                    "algo_params": algo_spec.params,
-                    "algorithm_label": algo_label(algo_spec),
-                    "mean_construction_time_ns": construction.rows["time_ns"].mean(),
-                    "mean_query_time_ns": query.rows["query_time_ns"].mean(),
+                    "algo_spec": algo_spec,
+                    "algorithm_label": config_label(algo_spec, config.algorithms),
+                    "mean_construction_time_ns": mean_construction_time_ns,
+                    "mean_query_time_ns": mean_query_time_ns,
                     "mean_size_bytes": mean_size_bytes,
                     "bits_per_key": bits_per_key,
                     "relative_overhead": relative_overhead,
+                    # Final per-key metrics, shared verbatim by tables.py
+                    # and plotting.py so they can't disagree (construction
+                    # is measured as one total per structure-build, hence
+                    # the /n here; query_benchmark in benchmark.rs already
+                    # divides by the per-iteration key count).
+                    "construction_time_per_key_ns": mean_construction_time_ns / spec.n,
+                    "query_time_per_key_ns": mean_query_time_ns,
+                    "space_overhead_pct": relative_overhead * 100,
                 }
             )
     return pd.DataFrame.from_records(records)

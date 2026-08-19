@@ -1,10 +1,12 @@
-"""Step 4 (part 3): summary tables - one row per dataset, with a
-(algorithm, metric) column per algorithm: relative space overhead,
-absolute bits/key, and per-key construction/query time.
+"""Step 4 (part 3): summary table - rows grouped by algorithm *config*
+(one group per [[algorithm]] entry, 4 metric sub-rows each: construction
+time/key, query time/key, space overhead %, bits/key), columns grouped by
+distribution family (one column per swept value, via
+naming.dataset_instances - the same enumeration plotting.py uses).
 
-Written as both a CSV (for further post-processing) and a rendered PDF
-(matching the plots' PDF convention), grouped and shaded by distribution
-family so the "one table" still reads as separate distribution sections.
+Written as both a CSV (for further post-processing) and a Typst source
+file (`summary_table.typ`) - compiling that to PDF is left as a separate,
+manual step (`typst compile summary_table.typ`).
 """
 
 from __future__ import annotations
@@ -12,69 +14,49 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Callable
 
-import matplotlib.pyplot as plt
 import pandas as pd
 
-from experiments.naming import param_label_and_key
+from experiments.naming import config_row_label, dataset_instances, param_label_and_key
 
-# Each metric is computed from one row of `build_summary`'s output.
+# Each metric is computed from one row of `build_summary`'s output. Order
+# here is the row order within each config's group in the table.
 _METRICS: dict[str, Callable[[pd.Series], float]] = {
-    "space overhead (%)": lambda r: r["relative_overhead"] * 100,
+    "construction time/key (ns)": lambda r: r["construction_time_per_key_ns"],
+    "query time/key (ns)": lambda r: r["query_time_per_key_ns"],
+    "space overhead (%)": lambda r: r["space_overhead_pct"],
     "bits/key": lambda r: r["bits_per_key"],
-    "construction time/key (ns)": lambda r: r["mean_construction_time_ns"] / r["n"],
-    "query time/key (ns)": lambda r: r["mean_query_time_ns"],
 }
 
-# Alternating row-group background shades, one per distribution family (light surface).
+# Alternating column-group background shades, one per distribution family.
 _GROUP_COLORS = ["#f4f4f2", "#e8e8e5"]
 
 
 def build_table(summary: pd.DataFrame, algorithms: list) -> pd.DataFrame:
-    """Pivot `summary` into rows = (distribution, parameters), columns =
-    (algorithm_label, metric), sorted by distribution (declaration order in the
-    data) then swept parameter value."""
-    from experiments.results import algo_label
+    """Pivot `summary` into rows = (algorithm config label, metric),
+    columns = (distribution, parameters) - one row-group per
+    [[algorithm]] config (declaration order), one column per dataset
+    instance (naming.dataset_instances order)."""
+    instances = dataset_instances(summary)
 
     df = summary.copy()
-    labels_and_keys = df.apply(
-        lambda r: param_label_and_key(r["distribution"], r), axis=1
-    )
-    df["parameters"] = [lk[0] for lk in labels_and_keys]
-    df["_sort_key"] = [lk[1] for lk in labels_and_keys]
-
-    algo_labels = {a.name: algo_label(a) for a in algorithms}
-
-    dist_order = list(dict.fromkeys(df["distribution"]))
-    dataset_keys = (
-        df[["distribution", "parameters", "_sort_key"]]
-        .drop_duplicates(subset=["distribution", "parameters"])
-        # stable sort by sweep key first, then by distribution (declaration
-        # order), so each distribution's rows come out low-to-high internally.
-        .sort_values(by="_sort_key", kind="stable")
-        .sort_values(by="distribution", key=lambda col: col.map(dist_order.index), kind="stable")
-    )
+    labels_and_keys = df.apply(lambda r: param_label_and_key(r["distribution"], r), axis=1)
+    df["_parameters"] = [lk[0] for lk in labels_and_keys]
 
     rows = []
-    for _, key in dataset_keys.iterrows():
-        subset = df[
-            (df["distribution"] == key["distribution"])
-            & (df["parameters"] == key["parameters"])
-        ]
-        row = {"distribution": key["distribution"], "parameters": key["parameters"]}
-        for algo_spec in algorithms:
-            label = algo_labels[algo_spec.name]
-            matches = subset[subset["algorithm_label"] == label]
-            if matches.empty:
-                for metric in _METRICS:
-                    row[(label, metric)] = float("nan")
-                continue
-            algo_row = matches.iloc[0]
-            for metric, fn in _METRICS.items():
-                row[(label, metric)] = fn(algo_row)
-        rows.append(row)
+    for algo_spec in algorithms:
+        row_label = config_row_label(algo_spec, algorithms)
+        subset = df[df["algo_spec"].apply(lambda s: s is algo_spec)]
+        for metric, fn in _METRICS.items():
+            row = {"config": row_label, "metric": metric}
+            for inst in instances:
+                match = subset[
+                    (subset["distribution"] == inst.distribution) & (subset["_parameters"] == inst.parameters)
+                ]
+                row[(inst.distribution, inst.parameters)] = fn(match.iloc[0]) if not match.empty else float("nan")
+            rows.append(row)
 
-    table = pd.DataFrame(rows).set_index(["distribution", "parameters"])
-    table.columns = pd.MultiIndex.from_tuples(table.columns, names=["algorithm", "metric"])
+    table = pd.DataFrame(rows).set_index(["config", "metric"])
+    table.columns = pd.MultiIndex.from_tuples(table.columns, names=["distribution", "parameters"])
     return table
 
 
@@ -90,43 +72,92 @@ def _format_value(v: float) -> str:
     return f"{v:.3g}"
 
 
-def write_table_pdf(table: pd.DataFrame, out_path: Path) -> None:
-    n_rows, n_cols = table.shape
-    col_labels = [f"{algo}\n{metric}" for algo, metric in table.columns]
-    row_labels = [f"{dist}\n{params}" for dist, params in table.index]
-    cell_text = [[_format_value(v) for v in row] for row in table.itertuples(index=False)]
+def _typst_cell(
+    content: str,
+    *,
+    colspan: int = 1,
+    rowspan: int = 1,
+    fill: str | None = None,
+    align: str | None = None,
+) -> str:
+    args = []
+    if colspan != 1:
+        args.append(f"colspan: {colspan}")
+    if rowspan != 1:
+        args.append(f"rowspan: {rowspan}")
+    if fill is not None:
+        args.append(f'fill: rgb("{fill}")')
+    if align is not None:
+        args.append(f"align: {align}")
+    prefix = f"table.cell({', '.join(args)})" if args else ""
+    return f"{prefix}[{content}]"
 
-    fig_w = 1.8 + 1.5 * n_cols
-    fig_h = 0.9 + 0.45 * n_rows
-    fig, ax = plt.subplots(figsize=(fig_w, fig_h))
-    ax.axis("off")
 
-    mpl_table = ax.table(
-        cellText=cell_text,
-        rowLabels=row_labels,
-        colLabels=col_labels,
-        loc="center",
-        cellLoc="center",
-    )
-    mpl_table.auto_set_font_size(False)
-    mpl_table.set_fontsize(8)
-    mpl_table.scale(1, 1.8)
+def _column_family_spans(instances: list[tuple[str, str]]) -> list[tuple[str, int]]:
+    """[(distribution, number of consecutive columns)] in column order."""
+    spans: list[tuple[str, int]] = []
+    for dist, _params in instances:
+        if spans and spans[-1][0] == dist:
+            spans[-1] = (dist, spans[-1][1] + 1)
+        else:
+            spans.append((dist, 1))
+    return spans
 
-    dist_order = list(dict.fromkeys(d for d, _ in table.index))
-    color_for_dist = {d: _GROUP_COLORS[i % len(_GROUP_COLORS)] for i, d in enumerate(dist_order)}
-    for i, (dist, _params) in enumerate(table.index):
-        color = color_for_dist[dist]
-        mpl_table[(i + 1, -1)].set_facecolor(color)
-        for j in range(n_cols):
-            mpl_table[(i + 1, j)].set_facecolor(color)
 
-    fig.tight_layout()
-    fig.savefig(out_path, format="pdf")
-    plt.close(fig)
+def write_table_typ(table: pd.DataFrame, out_path: Path) -> None:
+    """Emit a Typst source file rendering `table` with merged header cells
+    (one per distribution family) and column shading by distribution
+    family. Not compiled to PDF here.
+
+    Each algorithm config gets its own full-width section row for its
+    label (bold, left-aligned) followed by its metric rows - matching the
+    whiteboard sketch's layout (a title band per config, not a
+    vertically-centered side label)."""
+    instances = [(dist, params) for dist, params in table.columns]
+    family_spans = _column_family_spans(instances)
+    fill_for_family = {d: _GROUP_COLORS[i % len(_GROUP_COLORS)] for i, (d, _span) in enumerate(family_spans)}
+    fill_for_col: list[str] = []
+    for dist, span in family_spans:
+        fill_for_col += [fill_for_family[dist]] * span
+
+    n_cols = 1 + len(instances)
+    cells: list[str] = []
+
+    # Header row 1: corner (spans both header rows, just the metric-name
+    # column) + one colspan cell per distribution family.
+    cells.append(_typst_cell("", rowspan=2))
+    for dist, span in family_spans:
+        cells.append(_typst_cell(dist, colspan=span, fill=fill_for_family[dist]))
+    # Header row 2: one cell per instance (its swept-parameter label).
+    for (_dist, params), fill in zip(instances, fill_for_col):
+        cells.append(_typst_cell(params, fill=fill))
+
+    # Body: one full-width title row per config, then one row per metric.
+    for config in dict.fromkeys(c for c, _m in table.index):
+        sub = table.loc[config]
+        cells.append(_typst_cell(f"*{config}*", colspan=n_cols, align="left + horizon"))
+        for metric in sub.index:
+            cells.append(_typst_cell(metric, align="left + horizon"))
+            row = sub.loc[metric]
+            for col, fill in zip(instances, fill_for_col):
+                cells.append(_typst_cell(_format_value(row[col]), fill=fill))
+
+    body = ",\n  ".join(cells)
+    content = f"""#set page(width: auto, height: auto, margin: 1cm)
+#set text(size: 8pt)
+
+#table(
+  columns: {n_cols},
+  align: center + horizon,
+  stroke: 0.5pt,
+  {body},
+)
+"""
+    out_path.write_text(content)
 
 
 def write_tables(summary: pd.DataFrame, algorithms: list, plot_dir: Path) -> None:
     plot_dir.mkdir(parents=True, exist_ok=True)
     table = build_table(summary, algorithms)
     write_table_csv(table, plot_dir / "summary_table.csv")
-    write_table_pdf(table, plot_dir / "summary_table.pdf")
+    write_table_typ(table, plot_dir / "summary_table.typ")

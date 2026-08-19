@@ -2,34 +2,45 @@
 # Run from the repository root.
 
 [experiment]
-n = 100000
+n = 1000
 construction_repetitions = 20
 query_repetitions = 1000
-data_dir = "data"
-results_dir = "results"
-plot_dir = "plots"
+data_dir = "example/data"
+results_dir = "example/results"
+plot_dir = "example/plots"
 
 [[algorithm]]
 name = "consensus"
+display_name = "Consensus A"
 [algorithm.params]
-avg_group_load = 25
-inital_group_width = 20
+avg_group_load = 35
+inital_group_width = 30
+insertion_increment = 4
+max_difficulty_of_task = 8.0
+max_difficulty_at_group_border = 6
+
+[[algorithm]]
+name = "consensus"
+display_name = "Consensus B"
+[algorithm.params]
+avg_group_load = 35
+inital_group_width = 30
 insertion_increment = 8
-max_difficulty_of_task = 15.0
-max_difficulty_at_group_border = 12.0
+max_difficulty_of_task = 16
+max_difficulty_at_group_border = 12
 
 [[algorithm]]
 name = "caramel"
 
 [[distribution]]
 type = "uniform"
-bound = [3, 17]
+bound = [3]
 
 [[distribution]]
 type = "bernoulli"
-p = [0.2,  0.3,  0.5]
+p = [0.1,  0.5]
 
 [[distribution]]
 type = "truncated_geometric"
 p = [0.2]
-bound = [10, 20]
+bound = [10]
