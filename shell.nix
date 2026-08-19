@@ -7,6 +7,7 @@ pkgs.mkShell {
     cmake
     gnumake
     git
+    tbb
     (python3.withPackages (python-pkgs: with python-pkgs; [ pandas matplotlib ]))
   ];
   shellHook = ''

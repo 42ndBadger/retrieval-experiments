@@ -22,6 +22,7 @@ fn main() {
     let lsf_dst = cmake::Config::new("lsf")
         .profile("Release")
         .out_dir(Path::new(&out_dir).join("lsf"))
+        .define("CMAKE_POLICY_VERSION_MINIMUM", "3.5")
         .build();
     println!(
         "cargo:rustc-link-search=native={}",
