@@ -11,6 +11,7 @@ plot_dir = "small/plots"
 
 [[algorithm]]
 name = "consensus"
+display_name = "Consensus A"
 [algorithm.params]
 avg_group_load = 35
 inital_group_width = 30
@@ -20,6 +21,7 @@ max_difficulty_at_group_border = 6
 
 [[algorithm]]
 name = "consensus"
+display_name = "Consensus B"
 [algorithm.params]
 avg_group_load = 35
 inital_group_width = 30
@@ -29,6 +31,7 @@ max_difficulty_at_group_border = 12.0
 
 [[algorithm]]
 name = "consensus"
+display_name = "Consensus C"
 [algorithm.params]
 avg_group_load = 60
 inital_group_width = 50
