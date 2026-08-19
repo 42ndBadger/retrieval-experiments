@@ -4,17 +4,18 @@ use crate::instance::BenchmarkInstance;
 use crate::instance::Input;
 
 #[derive(Debug, Serialize)]
-pub struct ConstructionResult {
+pub struct ConstructionResult<E: Serialize = ()> {
     iteration: usize,
     time_ns: u64,
     size: usize,
+    extra: E,
 }
 
 pub fn construction_benchmark<'a, T: BenchmarkInstance<'a>>(
     iters: usize,
     input: Input<'a>,
     param: &T::Params,
-) -> Vec<ConstructionResult> {
+) -> Vec<ConstructionResult<T::Extra>> {
     let mut results = Vec::with_capacity(iters);
     for i in 0..iters {
         let start = std::time::Instant::now();
@@ -25,6 +26,7 @@ pub fn construction_benchmark<'a, T: BenchmarkInstance<'a>>(
             iteration: i,
             time_ns: took.as_nanos() as u64,
             size,
+            extra: t.extra(),
         });
     }
     results

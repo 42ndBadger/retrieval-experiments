@@ -20,7 +20,7 @@ pub enum MeasurementType {
 
 pub fn write_measurement(
     config: MeasurementInfo,
-    measurements: Vec<impl Serialize>,
+    measurements: impl IntoIterator<Item = impl Serialize>,
     mut writer: impl Write,
 ) -> anyhow::Result<()> {
     serde_json::to_writer(&mut writer, &config)?;

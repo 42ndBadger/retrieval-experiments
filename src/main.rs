@@ -1,8 +1,11 @@
 use clap::{Parser, Subcommand, ValueEnum};
-use retrieval_experiments::benchmark::{construction_benchmark, query_benchmark};
+use retrieval_experiments::benchmark::{
+    ConstructionResult, QueryResult, construction_benchmark, query_benchmark,
+};
 use retrieval_experiments::measurement_writer::{
     MeasurementInfo, MeasurementType, write_measurement,
 };
+use serde::Serialize;
 use serde_json::json;
 use std::collections::HashMap;
 use std::fs;
@@ -115,7 +118,11 @@ fn main() {
 
             let algo_params = parse_params(params);
 
-            let (construction_results, query_results, param) = match algorithm {
+            let (construction_results, query_results, param): (
+                Box<dyn Iterator<Item = Box<dyn erased_serde::Serialize>>>,
+                _,
+                _,
+            ) = match algorithm {
                 Algorithm::Consensus => {
                     let consensus_params = consensus_retrieval::parameters::Parameters {
                         avg_group_load: algo_params
@@ -151,25 +158,33 @@ fn main() {
                         "max_difficulty_of_task": consensus_params.max_difficulty_of_task,
                         "max_difficulty_at_group_border": consensus_params.max_difficulty_at_group_border,
                     });
+                    let constr = construction_benchmark::<ConsensusRetrieval<&str, u32>>(
+                        *construction_repetitions,
+                        &kv,
+                        &consensus_params,
+                    );
+                    let query = query_benchmark::<ConsensusRetrieval<&str, u32>>(
+                        *query_repetitions,
+                        &kv,
+                        &consensus_params,
+                    );
+
                     (
-                        construction_benchmark::<ConsensusRetrieval<&str, u32>>(
-                            *construction_repetitions,
-                            &kv,
-                            &consensus_params,
-                        ),
-                        query_benchmark::<ConsensusRetrieval<&str, u32>>(
-                            *query_repetitions,
-                            &kv,
-                            &consensus_params,
-                        ),
+                        Box::new(constr.into_iter().map(|x| Box::new(x) as _)),
+                        query,
                         param_json,
                     )
                 }
-                Algorithm::Caramel => (
-                    construction_benchmark::<CsfU32>(*construction_repetitions, &kv, &()),
-                    query_benchmark::<CsfU32>(*query_repetitions, &kv, &()),
-                    json!(()),
-                ),
+                Algorithm::Caramel => {
+                    let constr =
+                        construction_benchmark::<CsfU32>(*construction_repetitions, &kv, &());
+                    let query = query_benchmark::<CsfU32>(*query_repetitions, &kv, &());
+                    (
+                        Box::new(constr.into_iter().map(|x| Box::new(x) as _)),
+                        query,
+                        json!(()),
+                    )
+                }
             };
 
             let config = MeasurementInfo {
