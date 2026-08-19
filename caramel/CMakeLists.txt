@@ -11,4 +11,4 @@ set_target_properties(caramel_lib PROPERTIES EXCLUDE_FROM_ALL FALSE)
 target_sources(caramel_lib PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/caramel.cpp)
 
-# install(TARGETS caramel_lib ARCHIVE DESTINATION lib)
+install(TARGETS caramel_lib ARCHIVE DESTINATION lib)
