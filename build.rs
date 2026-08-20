@@ -32,7 +32,6 @@ fn main() {
     println!("cargo:rustc-link-lib=static=tlx");
 
     println!("cargo:rustc-link-lib=stdc++");
-    println!("cargo:rustc-link-lib=gomp");
     println!("cargo:rustc-link-lib=m");
     println!("cargo:rustc-link-lib=pthread");
 }
