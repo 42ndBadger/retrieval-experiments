@@ -1,6 +1,10 @@
 """Pipeline entry point. Run from the repository root:
 
     python -m experiments.run experiments/example_config.toml
+
+Produces data/results/summary.json only - no PDFs. Rendering summary.json
+into PDFs (a table + tradeoff plots) is a separate, manual step that needs
+Typst installed; see typst/render.sh.
 """
 
 from __future__ import annotations
@@ -9,12 +13,9 @@ import argparse
 
 from experiments.bench import run_benchmarks
 from experiments.config import expand_datasets, load_config
-from experiments.csv_export import write_instance_csvs
 from experiments.datagen import ensure_datasets
 from experiments.json_export import write_summary_json
-from experiments.plotting import plot_overhead_vs_time
 from experiments.results import build_summary
-from experiments.tables import write_tables
 
 
 def main() -> None:
@@ -27,7 +28,7 @@ def main() -> None:
         "--skip-bench", action="store_true", help="assume all results already exist"
     )
     parser.add_argument(
-        "--skip-plot", action="store_true", help="don't produce PDF plots"
+        "--skip-summary", action="store_true", help="don't (re)write summary.json"
     )
     parser.add_argument(
         "--force-bench",
@@ -44,13 +45,10 @@ def main() -> None:
         ensure_datasets(specs, config)
     if not args.skip_bench:
         run_benchmarks(specs, config, force=args.force_bench)
-    if not args.skip_plot:
+    if not args.skip_summary:
         summary = build_summary(specs, config)
-        plot_overhead_vs_time(summary, config.algorithms, config.plot_dir)
-        write_tables(summary, config.algorithms, config.plot_dir)
-        write_instance_csvs(summary, config.plot_dir)
         write_summary_json(specs, summary, config, config.plot_dir)
-        print(f"plots, tables, per-instance CSVs, and summary.json written to {config.plot_dir}")
+        print(f"summary.json written to {config.plot_dir}")
 
 
 if __name__ == "__main__":

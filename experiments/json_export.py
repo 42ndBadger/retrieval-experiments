@@ -1,10 +1,9 @@
-"""Step 4 (part 5): one consolidated JSON file with everything the TOML
-config specifies (n, repetitions, algorithms + their params, distribution
-families + their swept variants and entropy) plus all the aggregated
-measurements/std-devs currently spread across the per-instance CSVs
-(csv_export.py) - nested so a hand-written Typst script can walk it
-directly instead of re-joining rows. Written alongside the existing
-CSV/Typst-table outputs, not replacing them (yet).
+"""Step 4: the pipeline's sole output beyond raw data/results - one
+consolidated JSON file with everything the TOML config specifies (n,
+repetitions, algorithms + their params, distribution families + their
+swept variants and entropy) plus all the aggregated measurements/std-devs
+- nested so a hand-written Typst script (see typst/) can walk it directly
+instead of re-joining rows.
 
 Schema:
 

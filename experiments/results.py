@@ -78,12 +78,11 @@ def build_summary(specs: list[DatasetSpec], config: ExperimentConfig) -> pd.Data
     overhead.
 
     `algorithm` is the raw algorithm name (e.g. "consensus"), shared by
-    sibling configs - used to group them as one family in plots/tables.
+    sibling configs - used to group them as one family in json_export.py.
     `algorithm_label` is the human-readable per-config display label (see
     naming.py::config_label). `algo_spec` carries the exact AlgorithmSpec
-    so downstream code (naming.differing_params/config_row_label) can
-    identify a row's sibling group precisely, without re-matching on
-    label strings.
+    so downstream code (json_export.py::_algorithm_entry) can identify a
+    row's sibling group precisely, without re-matching on label strings.
     """
     records = []
     for spec in specs:
@@ -128,11 +127,11 @@ def build_summary(specs: list[DatasetSpec], config: ExperimentConfig) -> pd.Data
                 "relative_overhead": relative_overhead,
                 "bits_per_key_std": bits_per_key_std,
                 "relative_overhead_std": relative_overhead_std,
-                # Final per-key metrics, shared verbatim by tables.py
-                # and plotting.py so they can't disagree (construction
-                # is measured as one total per structure-build, hence
-                # the /n here; query_benchmark in benchmark.rs already
-                # divides by the per-iteration key count).
+                # Final per-key metrics, shared verbatim by json_export.py
+                # (construction is measured as one total per
+                # structure-build, hence the /n here; query_benchmark in
+                # benchmark.rs already divides by the per-iteration key
+                # count).
                 "construction_time_per_key_ns": mean_construction_time_ns / spec.n,
                 "query_time_per_key_ns": mean_query_time_ns,
                 "construction_time_per_key_std_ns": construction_time_std_ns / spec.n,
