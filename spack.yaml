@@ -1,0 +1,21 @@
+# Reproducible spack environment for this repo, named "retrieval-experiments"
+# (see README.md's "Dependencies" section for the full explanation and
+# manual-setup alternative). Create/activate it with:
+#
+#   spack env create retrieval-experiments spack.yaml
+#   spack env activate retrieval-experiments
+#   spack install
+#
+# `run_with_spack.sh` activates this env by name before running the
+# Python pipeline.
+spack:
+  specs:
+    - rust
+    - cmake
+    - gmake
+    - git
+    - python@3.11:
+    - py-pandas
+  concretizer:
+    unify: true
+  view: true

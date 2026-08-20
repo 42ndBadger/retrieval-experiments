@@ -1,6 +1,6 @@
 """Pipeline entry point. Run from the repository root:
 
-    python -m experiments.run experiments/example_config.toml
+    python -m experiments.run config/example_config.toml
 
 Produces data/results/summary.json only - no PDFs. Rendering summary.json
 into PDFs (a table + tradeoff plots) is a separate, manual step that needs
