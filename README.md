@@ -1,17 +1,20 @@
 # retrieval-experiments
 
 Benchmarking harness comparing static-function/retrieval-data-structure
-implementations (currently Consensus and Caramel) across swept synthetic
-data distributions. A Rust CLI generates data and runs the benchmarks; a
-Python pipeline drives it from a TOML config and produces a JSON summary;
-Typst templates render that summary into PDF plots/tables. See
-`CLAUDE.md` for the full design rationale and status notes.
+implementations - Consensus, Caramel, and LSF (Learned Static Function) -
+across swept synthetic data distributions. A Rust CLI generates data and
+runs the benchmarks; a Python pipeline drives it from a TOML config and
+produces a JSON summary; Typst templates render that summary into PDF
+plots/tables. See `CLAUDE.md` for the full design rationale and status
+notes.
 
 ## Repository layout
 
 - `src/` - the Rust CLI (`gen`/`bench` subcommands, see `src/main.rs`).
-  Links against a vendored `caramel/CaramelDB` (C++, via a git submodule +
-  `build.rs`/cmake) and the sibling `consensus-retrieval` crate.
+  Links against two vendored C++ libraries, each a git submodule built
+  from `build.rs`/cmake - `caramel/CaramelDB` and
+  `lsf/LearnedStaticFunction` (only its non-TensorFlow pieces, see
+  `lsf/CMakeLists.txt`) - plus the sibling `consensus-retrieval` crate.
 - `experiments/` - the Python pipeline (`python -m experiments.run
   <config>`): reads a TOML config, generates data, runs benchmarks, writes
   `summary.json`. No plotting/table code lives here (see below).
@@ -30,11 +33,18 @@ Typst templates render that summary into PDF plots/tables. See
   this repo (`../consensus-retrieval` relative to this repo's root), not
   fetched automatically.
 - **Rust** (edition 2024 - a recent stable toolchain).
-- **A C++17 toolchain with OpenMP** (`g++`, linked as `stdc++`/`gomp`) and
-  **CMake** + **GNU Make** - `build.rs` builds the vendored
-  `caramel/CaramelDB` via `cmake::Config`.
-- **Git** with submodule support - `caramel/CaramelDB` is a git submodule;
-  after cloning, run `git submodule update --init --recursive`.
+- **A C++23-capable toolchain** (`g++` - LSF's shim needs C++23, Caramel
+  only C++17) plus **CMake** + **GNU Make** - `build.rs` builds both
+  vendored C++ libraries via `cmake::Config`. OpenMP/TBB are *not*
+  required - both are explicitly disabled in the vendored builds so every
+  algorithm stays single-threaded (see the "Build flags & fairness"
+  section below).
+- **Git** with submodule support - `caramel/CaramelDB` and
+  `lsf/LearnedStaticFunction` are git submodules, but **don't** run a
+  blind `git submodule update --init --recursive` at the repo root: LSF's
+  own `.gitmodules` pulls in a multi-gigabyte TensorFlow checkout we never
+  use. Run `./scripts/init-submodules.sh` instead, which initializes
+  exactly the submodules actually needed (documented inline).
 - **Python 3.11+** (needs stdlib `tomllib`) with **pandas**.
 - **Typst** - only for `typst/render.sh`'s manual rendering step; not
   needed to generate data/run benchmarks/produce `summary.json`.
@@ -52,9 +62,9 @@ spack env activate retrieval-experiments
 spack install
 ```
 
-You need a C++ compiler with OpenMP available to this environment. If
-your system already has one (e.g. `build-essential` on Debian/Ubuntu),
-just make sure spack can see it:
+You need a C++23-capable compiler (e.g. GCC 12+) available to this
+environment. If your system already has one (e.g. `build-essential` on a
+recent Debian/Ubuntu), just make sure spack can see it:
 
 ```sh
 spack compiler find
@@ -91,10 +101,12 @@ manager.
 
 ## Running
 
-Build the CLI once (subsequent `cargo run --release --` calls made by the
-Python pipeline reuse this build):
+Initialize submodules, then build the CLI once (subsequent
+`cargo run --release --` calls made by the Python pipeline reuse this
+build):
 
 ```sh
+./scripts/init-submodules.sh
 cargo build --release
 ```
 
@@ -122,3 +134,24 @@ Render that summary into PDFs (needs Typst, run separately/manually):
 ```sh
 typst/render.sh runs/small/plots
 ```
+
+## Build flags & fairness
+
+All three algorithms build Release, single-threaded, and pinned to the
+build machine's CPU (`-march=native` for the two C++ libraries via their
+`CMakeLists.txt`, `target-cpu=native` for Rust via `.cargo/config.toml`) -
+see the comments in `caramel/CMakeLists.txt` and `lsf/CMakeLists.txt` for
+the reasoning (OpenMP is stripped from Caramel's link line, ips2ra's
+parallel mode is disabled for LSF, and `consensus-retrieval` pulls in no
+threading dependency at all, so no algorithm benefits from extra cores).
+
+Two known asymmetries remain - see the note at the end of `CLAUDE.md`'s
+Status section for the full audit:
+
+- `-ffast-math` only applies to the two C++ algorithms (Caramel, LSF) -
+  there's no stable-Rust equivalent for Consensus.
+- Only the Rust build enables LTO (`Cargo.toml`'s `[profile.release]`);
+  neither `caramel/CMakeLists.txt` nor `lsf/CMakeLists.txt` turns on
+  `CMAKE_INTERPROCEDURAL_OPTIMIZATION`. Caramel's upstream
+  `CARAMEL_COMPILE_OPTIONS` also adds `-funroll-loops`, which neither LSF
+  nor the Rust build get an equivalent of.

@@ -102,9 +102,10 @@ depends on the user's own in-progress fix to `comp-table`/
 `tradeoff-plots`'s summary-json plumbing, done concurrently with this
 split. `data_dir`/`results_dir`/`plot_dir` resolve relative to the cwd at
 invocation (assumed to be the repo root), independent of where the Rust
-`cargo` subprocess itself runs. Untracked `example/`, `small/`, `1_small/`,
-`2_small/`, `small3/`, `lsf/` dirs at the repo root are generated
-data/results/summary.json output from various configs, not checked in.
+`cargo` subprocess itself runs. As of the "move configs to config dir"
+commit, every config's `data_dir`/`results_dir`/`plot_dir` lives under
+gitignored `runs/<name>/` instead of scattered top-level dirs (e.g.
+`runs/small/{data,results,plots}`); `config/` holds the TOML configs.
 
 Not done / possible follow-ups:
 - `n`, `construction_repetitions`, `query_repetitions`, `algorithms` are
@@ -178,4 +179,77 @@ third series - on `uniform bound=17` LSF hit ~4.96 bits/key (entropy
 confirming the integration is not just functional but competitive. At
 n=100000, `uniform bound=17` overhead drops to ~1.8%, i.e. LSF's per-item
 overhead dominates at small n more than Caramel's.
+
+## Build-flag fairness audit (2026-08-20, after merging `learned` to main)
+
+Checked whether all three algorithms build/run under comparable
+conditions. Confirmed fair:
+- **Single-threaded, all three.** Caramel's `CMakeLists.txt` strips
+  `OpenMP::OpenMP_CXX` from `caramel_lib`'s link line (CaramelDB's own
+  CMakeLists links it unconditionally otherwise); LSF's `CMakeLists.txt`
+  sets `IPS2RA_DISABLE_PARALLEL ON`; `consensus-retrieval`'s `Cargo.toml`
+  has no `rayon`/threading dependency at all. No algorithm can use extra
+  cores.
+- **Same CPU targeting.** `-march=native` in both `caramel/CMakeLists.txt`
+  and `lsf/CMakeLists.txt`; `target-cpu=native` via `.cargo/config.toml`'s
+  `rustflags` for the Rust build (covers `consensus-retrieval` too, since
+  Cargo applies the *root* package's profile/rustflags across the whole
+  build, not the dependency's own).
+- **Same CMake build type.** `build.rs` passes `.profile("Release")` for
+  both `cmake::Config` calls (caramel, lsf) - both `CMakeLists.txt`s gate
+  their extra flags on `CMAKE_BUILD_TYPE STREQUAL "Release"` (or
+  `RelWithDebInfo`), so this actually activates them.
+
+Found two real asymmetries, not yet fixed (flagged in README.md's "Build
+flags & fairness" section too):
+1. **`-ffast-math` only reaches the two C++ algorithms.** Both
+   `caramel/CMakeLists.txt` and `lsf/CMakeLists.txt` add it explicitly;
+   there's no equivalent stable-Rust flag to give Consensus the same
+   treatment (the closest nightly-only options aren't usable from a
+   stable toolchain), so this is likely irreducible rather than a bug to
+   fix.
+2. **Only the Rust build gets LTO/single-codegen-unit.** Top-level
+   `Cargo.toml`'s `[profile.release]` sets `lto = true, codegen-units =
+   1` - and this is what actually governs the build (Cargo ignores
+   `consensus-retrieval`'s *own* `[profile.release]`, e.g. its `lto =
+   "thin"`, since profile settings are only read from the root package
+   being built - not a fairness issue by itself, just a silent override
+   worth knowing about if `consensus-retrieval` is ever built
+   standalone). Neither `caramel/CMakeLists.txt` nor `lsf/CMakeLists.txt`
+   sets `CMAKE_INTERPROCEDURAL_OPTIMIZATION`, so Caramel/LSF get no
+   cross-translation-unit inlining at all. Additionally, Caramel's
+   upstream `CARAMEL_COMPILE_OPTIONS` (in `caramel/CaramelDB/CMakeLists.txt`,
+   not ours to edit without patching the submodule) adds `-funroll-loops`
+   or Release/RelWithDebInfo - LSF's `CMakeLists.txt` and the Rust build
+   have no equivalent, so Caramel gets one extra optimization the other
+   two don't.
+
+Not fixed pending user direction - enabling CMake IPO for both C++
+libraries and/or matching `-funroll-loops` for LSF would close most of
+gap 2; gap 1 (`-ffast-math`) has no clean fix on the Rust side.
+
+## Dependency freshness check (2026-08-20)
+
+Checked every direct dependency against its upstream latest:
+- **Rust crates** (both this repo's `Cargo.toml` and `consensus-retrieval`'s):
+  all already at the latest stable version on crates.io - no `Cargo.toml`
+  changes needed. Ran `cargo update` to refresh `Cargo.lock`'s transitive
+  deps to their latest semver-compatible versions anyway (20 packages,
+  all patch/minor bumps - `clap` 4.6.5→4.6.6, `cc`, `wasm-bindgen`, etc.);
+  rebuilt clean afterward.
+- **`lsf/LearnedStaticFunction` submodule**: already pinned to upstream's
+  current HEAD (`879b3df9`) - nothing to update.
+- **`caramel/CaramelDB` submodule**: was 4 months stale (`43589815`,
+  2026-04-20) - upstream gained exactly one new commit, `afc44704`
+  ("Interleaved bucket-contiguous solution layout (-60% query latency)
+  (#86)", 2026-08-17). Checked the diff before updating: touches only
+  construction/query internals (`Construct.h`, `BucketedHashStore.h`,
+  `CsfQueryCore.h`, the multiset construct files), not `Csf.h`'s public
+  `query()`/`getStats()` API our `caramel/caramel.cpp` wrapper calls, and
+  not `CMakeLists.txt`. Bumped the submodule pin, rebuilt clean, and
+  smoke-tested `bench -a caramel` end-to-end (construct+query+size all
+  produced sane output) before keeping the update - since this repo
+  exists to measure query/construction time, running 4 months behind a
+  commit specifically claiming a 60% query-latency win was worth fixing,
+  not just noting.
 
