@@ -1,7 +1,5 @@
 /target
-/results
-/data
-/plots
+/runs
 __pycache__/
 .direnv
 .cache

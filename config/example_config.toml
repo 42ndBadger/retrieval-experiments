@@ -5,9 +5,9 @@
 n = 1000
 construction_repetitions = 20
 query_repetitions = 1000
-data_dir = "example/data"
-results_dir = "example/results"
-plot_dir = "example/plots"
+data_dir = "runs/example/data"
+results_dir = "runs/example/results"
+plot_dir = "runs/example/plots"
 
 [[algorithm]]
 name = "consensus"
