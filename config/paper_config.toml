@@ -1,17 +1,16 @@
-# Example config for `python -m experiments.run experiments/small_config.toml`.
+# Example config for `python -m experiments.run experiments/paper_config.toml`.
 # Run from the repository root.
 
 [experiment]
-n = 100_000
+n = 10_000_000
 construction_repetitions = 1
 query_repetitions = 1_000
-data_dir = "small/data"
-results_dir = "small/results"
-plot_dir = "small/plots"
+data_dir = "runs/paper/data"
+results_dir = "runs/paper/results"
+plot_dir = "runs/paper/plots"
 
 [[algorithm]]
 name = "consensus"
-display_name = "Consensus A"
 [algorithm.params]
 avg_group_load = 35
 inital_group_width = 30
@@ -21,7 +20,6 @@ max_difficulty_at_group_border = 6
 
 [[algorithm]]
 name = "consensus"
-display_name = "Consensus B"
 [algorithm.params]
 avg_group_load = 35
 inital_group_width = 30
@@ -29,22 +27,21 @@ insertion_increment = 8
 max_difficulty_of_task = 16
 max_difficulty_at_group_border = 12.0
 
-# [[algorithm]]
-# name = "consensus"
-# display_name = "Consensus C"
-# [algorithm.params]
-# avg_group_load = 60
-# inital_group_width = 50
-# insertion_increment = 12
-# max_difficulty_of_task = 24
-# max_difficulty_at_group_border = 18
+[[algorithm]]
+name = "consensus"
+[algorithm.params]
+avg_group_load = 60
+inital_group_width = 50
+insertion_increment = 12
+max_difficulty_of_task = 24
+max_difficulty_at_group_border = 18
 
 [[algorithm]]
 name = "caramel"
 
 [[distribution]]
 type = "uniform"
-bound = [3, 23]
+bound = [3, 17, 23]
 
 [[distribution]]
 type = "bernoulli"
