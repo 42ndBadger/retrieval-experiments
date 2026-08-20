@@ -51,9 +51,9 @@ commit `e25582c` "Named algorithm configs + restructured summary
 table/plots", **split Python/Typst 2026-08-20**): the Python pipeline
 lives in `experiments/` (`config.py`, `entropy.py`, `naming.py`,
 `cli_runner.py`, `datagen.py`, `bench.py`, `results.py`, `measurements.py`,
-`json_export.py`, `run.py`), with example configs
-`experiments/example_config.toml`, `experiments/small_config.toml`,
-`experiments/paper_config.toml`. Run from the repo root:
+`environment.py`, `json_export.py`, `run.py`), with example configs
+`config/example_config.toml`, `config/small_config.toml`,
+`config/paper_config.toml`. Run from the repo root:
 
     cargo build --release   # once, so `cargo run --release --` is fast
     python -m experiments.run experiments/example_config.toml
@@ -252,4 +252,44 @@ Checked every direct dependency against its upstream latest:
   exists to measure query/construction time, running 4 months behind a
   commit specifically claiming a 60% query-latency win was worth fixing,
   not just noting.
+
+## `summary.json` now records the execution environment (2026-08-20)
+
+New `experiments/environment.py::collect_environment_info()`, called once
+from `json_export.py::write_summary_json` and written as a new top-level
+`"environment"` key (hostname, `platform.platform()`, CPU model from
+`/proc/cpuinfo`'s `model name` line, logical core count, `rustc
+--version`, the C++ compiler `build.rs`/cmake would actually use (`$CXX`
+if set, else `c++`) and its `--version`, and `cmake --version`).
+Motivated directly by the build-flag-fairness audit above: since the
+Rust/C++ builds are pinned to the exact build machine's CPU via
+`-march=native`/`target-cpu=native`, a run's numbers aren't meaningfully
+comparable to another run without knowing what CPU/compilers produced
+them. Best-effort by design - every field is `None` rather than raising
+if it can't be determined (e.g. non-Linux, missing binary), since this is
+diagnostic metadata a run shouldn't fail over. Collected in Python at
+`experiments.run` time rather than baked into the Rust binary at compile
+time - simpler, matches the existing "Python owns summary.json" split,
+and doesn't need a rebuild to pick up toolchain changes; the tradeoff is
+it reflects whatever's on `PATH`/`/proc/cpuinfo` *when the pipeline runs*,
+not necessarily what built whichever `target/release` binary happens to
+be sitting there if you upgraded a toolchain without rebuilding since.
+`experiments/example_summary.json` (the docstring's worked example, and
+previously the Typst templates' hardcoded-path fallback) was updated with
+a representative `environment` block by hand rather than by a full
+regenerated run, to avoid otherwise-unrelated diff noise in that fixture.
+Verified 2026-08-20: `collect_environment_info()` standalone, and a full
+`config/example_config.toml` run (incl. `lsf`, whose results were
+missing for that config until this run) - `summary.json` now carries the
+new key correctly.
+
+`typst/summary.typ` (not `comparison_table.typ`/`tradeoff_plots.typ`
+themselves, left to the user) renders it as a small gray footer line
+below the tradeoff plots - `Execution environment: Host: ... · OS: ... ·
+CPU: ... · Logical cores: ... · rustc: ... · C++ compiler: ... · cmake:
+...` - built from a `(label, value)` pairs list filtered to drop any
+`none`/missing field, so it degrades gracefully for older `summary.json`
+files without the key at all, or with individual fields unset. Verified
+by rendering `runs/example/plots/summary.json` via `typst/render.sh` and
+inspecting the output PDF.
 

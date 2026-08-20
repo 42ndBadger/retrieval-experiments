@@ -9,6 +9,11 @@ Schema:
 
     {
       "n": int, "construction-reps": int, "query-reps": int,
+      "environment": {
+        "hostname": str, "os": str, "cpu": str, "logical_cpus": int,
+        "rustc_version": str, "cxx_compiler": str,
+        "cxx_compiler_version": str, "cmake_version": str
+      },
       "distrs": [{"name": str, "sub": [
         {"params": {...}, "analytical_entropy": float, "empirical_entropy": float}
       ]}],
@@ -34,6 +39,7 @@ import pandas as pd
 
 from experiments.config import DatasetSpec, ExperimentConfig
 from experiments.entropy import empirical_entropy_bits, entropy_bits
+from experiments.environment import collect_environment_info
 from experiments.measurements import measurement_columns
 from experiments.naming import config_label, dataset_path, param_label_and_key, variant_params
 
@@ -108,6 +114,7 @@ def write_summary_json(
         "n": config.n,
         "construction-reps": config.construction_repetitions,
         "query-reps": config.query_repetitions,
+        "environment": collect_environment_info(),
         "distrs": _top_level_distrs(specs, config),
         "algs": [_algorithm_entry(algo_spec, config, summary) for algo_spec in config.algorithms],
     }

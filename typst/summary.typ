@@ -12,6 +12,28 @@
 
 #let summary = json(sys.inputs.at("summary"))
 
+// `environment` is only present in summary.json from 2026-08-20 onward
+// (experiments/environment.py) - missing entirely for older files, and
+// any individual field can be `null` too (best-effort capture, see that
+// module's docstring), so both are tolerated rather than erroring.
+#let env = summary.at("environment", default: none)
+
 #comp-table(summary)
 #pagebreak()
 #tradeoff-plots(summary)
+
+#if env != none {
+  let fields = (
+    ("Host", env.at("hostname", default: none)),
+    ("OS", env.at("os", default: none)),
+    ("CPU", env.at("cpu", default: none)),
+    ("Logical cores", env.at("logical_cpus", default: none)),
+    ("rustc", env.at("rustc_version", default: none)),
+    ("C++ compiler", env.at("cxx_compiler_version", default: none)),
+    ("cmake", env.at("cmake_version", default: none)),
+  ).filter(f => f.at(1) != none)
+
+  v(1em)
+  [= Execution environment]
+  fields.map(f => [#f.at(0): #f.at(1)]).join([ · ])
+}
