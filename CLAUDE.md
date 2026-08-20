@@ -48,59 +48,73 @@ tasks done and to be done here.
 ## Status
 Implemented (2026-08-13, extended 2026-08-15, restructured 2026-08-1x in
 commit `e25582c` "Named algorithm configs + restructured summary
-table/plots"): the full pipeline lives in `experiments/` (`config.py`,
-`entropy.py`, `naming.py`, `cli_runner.py`, `datagen.py`, `bench.py`,
-`results.py`, `plotting.py`, `tables.py`, `run.py`), with example configs
+table/plots", **split Python/Typst 2026-08-20**): the Python pipeline
+lives in `experiments/` (`config.py`, `entropy.py`, `naming.py`,
+`cli_runner.py`, `datagen.py`, `bench.py`, `results.py`, `measurements.py`,
+`json_export.py`, `run.py`), with example configs
 `experiments/example_config.toml`, `experiments/small_config.toml`,
 `experiments/paper_config.toml`. Run from the repo root:
 
     cargo build --release   # once, so `cargo run --release --` is fast
     python -m experiments.run experiments/example_config.toml
 
-Current output (post-restructure - this superseded the original
-per-distribution-family design mentioned above):
-- **Plots**: one PDF per *dataset instance* - a (distribution, single
-  swept-parameter-value) pair, e.g. `overhead_vs_construction_bernoulli_p0.1.pdf`,
-  `overhead_vs_construction_bernoulli_p0.2.pdf`, ... - not one plot per
-  whole distribution family with a curve across the entropy sweep.
-  `naming.py::dataset_instances` enumerates these instances (shared by
-  plotting.py and tables.py). Within one instance's plot, each *algorithm*
-  gets one fixed color+marker, and sibling configs of the same algorithm
-  (e.g. differently-tuned Consensus runs) are drawn as separate points
-  connected by a line, sorted by relative overhead - so the line traces
-  that algorithm's own config tradeoff on that one dataset, not an
-  entropy sweep.
-- **Table**: `write_tables` (tables.py) only emits `summary_table.csv` and
-  a Typst source file `summary_table.typ` - it no longer writes a PDF
-  directly. Compiling to PDF is a manual separate step
-  (`typst compile summary_table.typ`). Rows are grouped by algorithm
-  *config* (one group per `[[algorithm]]` entry, 4 metric sub-rows each),
-  columns by dataset instance, shaded by distribution family.
+**As of 2026-08-20, `run.py` only writes `<plot_dir>/summary.json`** - no
+PDFs, no CSVs, no matplotlib dependency. This is so the data-gen/benchmark
+step can run on a server with no Typst installed. `plotting.py`,
+`tables.py`, and `csv_export.py` (and the `naming.py` helpers that only
+existed for them - `dataset_instances`/`instance_groups`/
+`config_row_label`/`differing_params`/`DatasetInstance`) were deleted;
+`--skip-plot` became `--skip-summary`.
 
-`naming.py::param_label_and_key` remains the shared source of truth both
-plotting.py and tables.py use for the human-readable swept parameter
-label and its sort key, so labels/ordering stay consistent between plots
-and tables. `naming.py::config_label`/`config_row_label` handle the new
-per-config display names (`display_name` in the TOML, required when
-multiple configs share an algorithm name).
+Rendering `summary.json` into PDFs is now a **separate, manual step** in
+`typst/` (not invoked by `run.py`):
+- `typst/style.typ`: minimal shared prelude - just re-exports `strfmt`
+  (from `@preview/oxifmt`) and a `colors` dict (`lightgray`/`yellow`),
+  the only two things `comparison_table.typ` actually used from the old
+  `../style.typ` import, which was never committed to this repo and had
+  to be reconstructed from usage.
+- `typst/comparison_table.typ` (`comp-table(data)`) and
+  `typst/tradeoff_plots.typ` (`tradeoff-plots(summary, ..)`) are the two
+  content generators, each taking the parsed `summary.json` as a
+  parameter (fixed by the user from an earlier WIP state where
+  `comp-table` ignored its parameter and hardcoded reading
+  `example_summary.json` instead).
+- `typst/summary.typ` is the actual compile entry point: loads
+  `json(sys.inputs.at("summary"))` and calls both generators into one
+  report (table, then a page break, then the tradeoff plots).
+- `typst/render.sh <plot_dir> [<plot_dir> ...]`: thin bash wrapper - for
+  each `plot_dir` (must be inside the repo, containing a `summary.json`),
+  runs `typst compile --root <repo> --input summary=/<rel>/summary.json
+  typst/summary.typ <plot_dir>/summary_report.pdf`. Requires `typst` on
+  PATH; run it locally/wherever Typst is installed.
+
+`naming.py::param_label_and_key` remains the shared source of truth for
+the human-readable swept-parameter label (used by `json_export.py` and,
+via `variant_params`, per-variant JSON keys). `naming.py::config_label`
+handles per-config display names (`display_name` in the TOML, required
+when multiple configs share an algorithm name).
 
 Verified end-to-end 2026-08-15 (before the restructure) with a small
-smoke config; not re-verified end-to-end since. `data_dir`/`results_dir`/
-`plot_dir` resolve relative to the cwd at invocation (assumed to be the
-repo root), independent of where the Rust `cargo` subprocess itself runs.
-Untracked `example/`, `small/`, `old-small/` dirs at the repo root are
-generated data/results/plots output from the example/small configs, not
-checked in.
+smoke config. The `run.py` → `summary.json`-only path was smoke-tested
+2026-08-20 against the `example` config. The Typst render path
+(`render.sh`/`summary.typ`) has *not* been verified end-to-end - it
+depends on the user's own in-progress fix to `comp-table`/
+`tradeoff-plots`'s summary-json plumbing, done concurrently with this
+split. `data_dir`/`results_dir`/`plot_dir` resolve relative to the cwd at
+invocation (assumed to be the repo root), independent of where the Rust
+`cargo` subprocess itself runs. Untracked `example/`, `small/`, `1_small/`,
+`2_small/`, `small3/`, `lsf/` dirs at the repo root are generated
+data/results/summary.json output from various configs, not checked in.
 
 Not done / possible follow-ups:
 - `n`, `construction_repetitions`, `query_repetitions`, `algorithms` are
   global-only in the config (not swept/overridable per distribution).
 - Consensus's `b` parameter is hardcoded to 20 in the Rust CLI
   (`src/main.rs`) and not exposed for sweeping.
-- No automated tests for `experiments/`, only manual smoke-run verification
-  (and that was against the pre-restructure plot/table layout).
-- Re-verify end-to-end against the current per-instance plots + csv/typ
-  table output.
+- No automated tests for `experiments/`, only manual smoke-run
+  verification.
+- Re-verify `typst/render.sh` end-to-end once `comparison_table.typ`/
+  `tradeoff_plots.typ`'s summary-json wiring is finished.
 
 ## Third algorithm: `lsf` (Learned Static Function, added 2026-08-19)
 Integrated gvinciguerra/LearnedStaticFunction (github.com/gvinciguerra/

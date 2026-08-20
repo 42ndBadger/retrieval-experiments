@@ -1,7 +1,5 @@
 """Single source of truth for "which results.py::build_summary column is
-which output measurement key" - shared by csv_export.py and
-json_export.py so the CSVs and the JSON describe the same data with the
-same vocabulary instead of each maintaining their own mapping."""
+which output measurement key" - used by json_export.py."""
 
 from __future__ import annotations
 

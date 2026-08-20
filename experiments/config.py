@@ -55,7 +55,7 @@ class AlgorithmSpec:
     name: str
     params: dict[str, float | int] = field(default_factory=dict)
     # Short human-readable label for this specific config, e.g. "Consensus
-    # A" - shown instead of a raw param dump in plots/tables (see
+    # A" - shown instead of a raw param dump in summary.json (see
     # naming.py::config_label). Required when more than one config shares
     # `name` (see _validate_display_names below); optional otherwise, in
     # which case a per-algorithm default is used.
