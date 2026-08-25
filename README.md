@@ -32,7 +32,11 @@ notes.
   it via `path = "../consensus-retrieval"`, so it must be cloned next to
   this repo (`../consensus-retrieval` relative to this repo's root), not
   fetched automatically.
-- **Rust** (edition 2024 - a recent stable toolchain).
+- **Rust** (edition 2024, needs rustc 1.85+). Install via
+  [rustup](https://rustup.rs) - don't rely on a package manager's `rust`,
+  including spack's (see "Setting up via spack" below): distro/spack
+  packages routinely lag behind the stable release needed for edition
+  2024.
 - **A C++23-capable toolchain** (`g++` - LSF's shim needs C++23, Caramel
   only C++17) plus **CMake** + **GNU Make** - `build.rs` builds both
   vendored C++ libraries via `cmake::Config`. OpenMP/TBB are *not*
@@ -52,15 +56,20 @@ notes.
 ### Setting up via spack
 
 The repo's `spack.yaml` defines a spack environment named
-`retrieval-experiments` with the Rust/CMake/Make/Git/Python/pandas
-dependencies above (everything except the C++ compiler itself and Typst -
-see below). Create and install it once:
+`retrieval-experiments` with the CMake/Make/Git/Python/pandas
+dependencies above (everything except Rust, the C++ compiler itself, and
+Typst - see below). Create and install it once:
 
 ```sh
 spack env create retrieval-experiments spack.yaml
 spack env activate retrieval-experiments
 spack install
 ```
+
+Rust is deliberately **not** part of this environment - install it via
+[rustup](https://rustup.rs) instead (see "Dependencies" above) and leave
+it on `PATH`; `cargo`/`rustc` resolve there regardless of whether the
+spack env is active.
 
 You need a C++23-capable compiler (e.g. GCC 12+) available to this
 environment. If your system already has one (e.g. `build-essential` on a

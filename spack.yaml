@@ -8,9 +8,15 @@
 #
 # `run_with_spack.sh` activates this env by name before running the
 # Python pipeline.
+#
+# Deliberately NOT installing Rust via spack: spack's `rust` package lags
+# upstream (latest concrete release is 1.81.0 as of this writing), and
+# this repo's `Cargo.toml` needs edition 2024, which requires rustc 1.85+
+# - an env built with spack's `rust` spec can't compile it. Install Rust
+# via rustup instead (https://rustup.rs) and let it sit on PATH ahead of
+# this spack env; see README.md's "Dependencies" section.
 spack:
   specs:
-    - rust
     - cmake
     - gmake
     - git
