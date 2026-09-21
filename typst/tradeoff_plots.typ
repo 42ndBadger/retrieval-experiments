@@ -58,8 +58,8 @@ for dist in summary.distrs {
       lq.plot(
         xs, ys,
         label: fam.name,
-        stroke: fam.color,
-         mark: fam.mark,
+        color: fam.color,
+        mark: fam.mark,
        )
      })
     )

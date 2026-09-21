@@ -293,3 +293,33 @@ files without the key at all, or with individual fields unset. Verified
 by rendering `runs/example/plots/summary.json` via `typst/render.sh` and
 inspecting the output PDF.
 
+## `comp-table` gained a trailing GM (geometric mean) column (2026-09-21)
+
+`typst/comparison_table.typ` now adds a rightmost "GM" column to each
+per-algorithm metric row (C, Q, S, O), aggregating that row's values
+across every swept distribution/parameter column with a geometric mean
+(`geomean`/`values-for`/`gmean-cell` helpers; `num_cols` bumped by one,
+header `GM` cell spans all 3 header rows via `rowspan: 3`). For the O
+(relative overhead %) row specifically, the GM is *not* a naive geomean
+of the overhead percentages - it's computed on the underlying
+`1 + rel_space_overhead` ratio (bits_per_key/entropy, always ≥ 1 barring
+measurement noise) and converted back to a percentage afterward. A plain
+geomean of the percentages themselves breaks down: a single 0% value
+collapses the whole product to 0, and any negative value (possible from
+entropy/measurement noise) makes the fractional root undefined.
+
+Whether geomean is "meaningful" differs by row: for C/Q/S (construction
+time, query time, space) - positive, ratio-scale physical quantities -
+geomean is a legitimate way to summarize across columns spanning very
+different absolute magnitudes (e.g. `uniform bound=3` vs `bound=23`)
+without letting the largest column dominate, the same justification used
+for e.g. SPEC-style benchmark aggregation; the arithmetic mean would still
+be a defensible alternative there depending on whether you want a "total
+cost" or "typical scale-invariant factor" reading. For O it's more clearly
+the right tool since the metric is already a ratio/relative quantity - as
+long as it's the ratio form being averaged, not the percentage.
+
+Verified 2026-09-21 by rendering `runs/small/plots/summary.json` via
+`typst/render.sh` and inspecting the output PDF - GM column renders
+correctly, values are plausible (between min and max of each row).
+
