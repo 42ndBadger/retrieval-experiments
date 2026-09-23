@@ -1,4 +1,14 @@
-# retrieval-experiments
+# Compressed Static Function Data Structure Experiments
+
+This repository contains code for benchmarking and comparing static function data structures:
+- [CONSENSUS-CSF](https://github.com/42ndBadger/consensus-retrieval)
+- [Caramel](https://github.com/detorresramos/CaramelDB)
+- [BuRR-VLR](https://github.com/gvinciguerra/LearnedStaticFunction)
+
+LLMs were used to create Rust bindings and python scripts.
+
+---
+
 
 Benchmarking harness comparing static-function/retrieval-data-structure
 implementations - Consensus, Caramel, and LSF (Learned Static Function) -
