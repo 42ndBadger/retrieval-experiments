@@ -5,7 +5,7 @@ This repository contains code for benchmarking and comparing static function dat
 - [Caramel](https://github.com/detorresramos/CaramelDB)
 - [BuRR-VLR](https://github.com/gvinciguerra/LearnedStaticFunction)
 
-LLMs were used to create Rust bindings and python scripts.
+LLMs were used to create Rust bindings and python scripts—performance sensitive measurement loops are hand-written.
 
 ---
 
