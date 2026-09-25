@@ -329,6 +329,7 @@ checksum = "1d07550c9036bf2ae0c684c4297d503f838287c83c53686d05370d0e139ae570"
 [[package]]
 name = "consensus-retrieval"
 version = "0.1.0"
+source = "git+https://github.com/42ndBadger/consensus-retrieval#01ab22d9c825f4ab1dae5a5355968909d758f7a3"
 dependencies = [
  "ahash",
  "bitvec",

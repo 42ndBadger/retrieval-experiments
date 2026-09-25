@@ -8,7 +8,7 @@ build = "build.rs"
 ahash = "0.8.12"
 anyhow = "1.0.104"
 clap = "4.6.5"
-consensus-retrieval = { path = "../consensus-retrieval" }
+consensus-retrieval = { git = "https://github.com/42ndBadger/consensus-retrieval" }
 csv = "1.4.0"
 erased-serde = "0.4.10"
 rand = "0.10.2"
