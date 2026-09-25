@@ -42,7 +42,7 @@ impl<'a> BenchmarkInstance<'a> for CsfU32 {
     type Params = ();
     type Extra = ();
 
-    fn create(input: crate::instance::Input<'_>, params: &Self::Params) -> Self {
+    fn create(input: crate::instance::Input<'_>, _params: &Self::Params) -> Self {
         let (keys, values): (Vec<_>, Vec<_>) = input.iter().map(|(k, v)| (k.as_bytes(), v)).unzip();
         let csf = CsfU32::new(&keys, &values).expect("valid");
         csf

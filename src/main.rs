@@ -1,11 +1,8 @@
 use clap::{Parser, Subcommand, ValueEnum};
-use retrieval_experiments::benchmark::{
-    ConstructionResult, QueryResult, construction_benchmark, query_benchmark,
-};
+use retrieval_experiments::benchmark::{construction_benchmark, query_benchmark};
 use retrieval_experiments::measurement_writer::{
     MeasurementInfo, MeasurementType, write_measurement,
 };
-use serde::Serialize;
 use serde_json::json;
 use std::collections::HashMap;
 use std::fs;
